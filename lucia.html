@@ -50,19 +50,20 @@
 <canvas id="glcanvas"></canvas>
 
 <div id="controls">
-  <label><span>Holo</span><input id="holoStrength" type="range" min="0" max="0.3" step="0.01" value="0.09"></label>
-  <label><span>Noise</span><input id="noiseStrength" type="range" min="0" max="0.2" step="0.01" value="0.07"></label>
-  <label><span>Bright</span><input id="brightness" type="range" min="0" max="1.5" step="0.01" value="1"></label>
-  <label><span>Speed</span><input id="speed" type="range" min="0" max="3" step="0.01" value="1"></label>
-  <label><span>Scale</span><input id="scaleSlider" type="range" min="0.75" max="3.0" step="0.05" value="3.0"></label>
-  <span id="scaleValue">Scale: 3.00</span>
+  <label><span>Holo</span><input id="holoStrength" type="range" min="0" max="0.3" step="0.01" value="0.06"></label>
+  <label><span>Noise</span><input id="noiseStrength" type="range" min="0" max="0.2" step="0.01" value="0.12"></label>
+  <label><span>Bright</span><input id="brightness" type="range" min="0" max="1.5" step="0.01" value="2"></label>
+  <label><span>Speed</span><input id="speed" type="range" min="0" max="3" step="0.01" value="0.75"></label>
+  <label><span>Snake</span><input id="xSlider" type="range" min="0" max="1" step="0.01" value="0.655"></label>
+  <label><span>Scale</span><input id="scaleSlider" type="range" min="0.75" max="3.0" step="0.05" value="2.40"></label>
+  <span id="scaleValue">Scale: 2.40</span>
 </div>
 
 <script>
 const canvas = document.getElementById("glcanvas");
 const gl = canvas.getContext("webgl");
 
-let scaleFactor = 3.0;
+let scaleFactor = 2.40;
 
 function resizeCanvas() {
   canvas.width = Math.floor(window.innerWidth * (scaleFactor / 3.0));
@@ -94,11 +95,9 @@ uniform float u_holoStrength;
 uniform float u_noiseStrength;
 uniform float u_brightness;
 uniform float u_speed;
-uniform float u_t; // <-- precomputed fade value
+uniform float u_t;
+uniform float u_x;
 
-float random(vec2 st) {
-  return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
-}
 vec3 hsv2rgb(vec3 c) {
   vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0,4,2),6.0)-3.0)-1.0,0.0,1.0);
   rgb = rgb*rgb*(3.0-2.0*rgb);
@@ -111,18 +110,18 @@ void main() {
   vec2 pos = uv-center;
   float r = length(pos)*2.0;
 
-  float t = u_t; // use uniform instead of per-pixel calc
+  float t = u_t * u_speed;
 
   vec3 baseColor = mix(vec3(10,14,18)/255.0, vec3(18,22,28)/255.0, t);
   vec3 brightColor = mix(baseColor, vec3(1.0), t*0.6);
   vec3 color = mix(baseColor, brightColor, smoothstep(0.1,0.8,r));
 
-  float grain = ((sin(uv.x*22.0 + uv.y*31.0 + u_time*0.9*u_speed)+1.0)*0.5) * 0.16;
+  float grain = ((sin(uv.x*22.0 + uv.y*31.0 + u_time*0.9)+1.0)*0.5) * 0.16;
   color += grain * u_noiseStrength;
 
-  float holoHue = mod(210.0 + 180.0*sin(u_time*0.00325*300.0*u_speed + (uv.x-uv.y)*8.0), 360.0) / 360.0;
+  float holoHue = mod(210.0 + 180.0*sin(u_time*0.00325*300.0 + (uv.x-uv.y)*8.0), 360.0) / 360.0;
   vec3 holo = hsv2rgb(vec3(holoHue, 0.25, 0.9));
-  color = mix(color, holo, u_holoStrength);
+  color = mix(color, holo, u_holoStrength * u_speed);
 
   float bigLine = step(0.0, mod(gl_FragCoord.y, 3.0) - 2.0);
   color = mix(color, vec3(1.0), (1.0-bigLine)*0.012);
@@ -133,8 +132,9 @@ void main() {
   float diagBig = step(0.45, fract((gl_FragCoord.x + gl_FragCoord.y)*0.03));
   color = mix(color, holo, (1.0-diagBig)*0.08);
 
-  float diagSmall = step(0.5, fract((gl_FragCoord.x + gl_FragCoord.y)*0.12));
-  color = mix(color, holo, (1.0-diagSmall)*0.05);
+  float snake = sin(uv.y * 25.0 + u_time * 3.0) * 0.15;
+  float diagSmall = step(0.5, fract((gl_FragCoord.x + gl_FragCoord.y + snake) * u_x));
+  color = mix(color, holo, (1.0-diagSmall)*0.19);
 
   gl_FragColor = vec4(color * u_brightness, 1.0);
 }
@@ -166,6 +166,7 @@ const noiseLoc = gl.getUniformLocation(program, "u_noiseStrength");
 const brightLoc = gl.getUniformLocation(program, "u_brightness");
 const speedLoc = gl.getUniformLocation(program, "u_speed");
 const tLoc = gl.getUniformLocation(program, "u_t");
+const xLoc = gl.getUniformLocation(program, "u_x");
 
 const buffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -182,8 +183,7 @@ function render(time) {
   gl.viewport(0, 0, canvas.width, canvas.height);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  // compute t ONCE per frame
-  const t = 0.35 * (0.5 + 0.5 * Math.sin(time * 0.001 * 0.2 * parseFloat(speed.value)));
+  const t = 0.35 * (0.5 + 0.5 * Math.sin(time * 0.001 * 0.2));
 
   gl.uniform2f(resLoc, canvas.width, canvas.height);
   gl.uniform1f(timeLoc, time*0.001);
@@ -192,6 +192,7 @@ function render(time) {
   gl.uniform1f(brightLoc, parseFloat(brightness.value));
   gl.uniform1f(speedLoc, parseFloat(speed.value));
   gl.uniform1f(tLoc, t);
+  gl.uniform1f(xLoc, parseFloat(xSlider.value));
 
   gl.drawArrays(gl.TRIANGLES, 0, 6);
   requestAnimationFrame(render);
