@@ -2,65 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Animated Gradient Noise (Ultra Subtle Scanlines)</title>
+  <title>Lucia ― Ultra Holo Diagonal</title>
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background: #000;
-    }
-    body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-    }
-    canvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-      position: fixed;
-      top: 0; left: 0;
-      z-index: 1;
-      pointer-events: none;
-    }
+    html, body { height: 100%; width: 100vw; margin: 0; padding: 0; overflow: hidden; background: #000; }
+    body { width: 100vw; height: 100vh; }
+    canvas { display: block; width: 100vw; height: 100vh; position: fixed; top:0; left:0; z-index:1; pointer-events:none; }
   </style>
 </head>
 <body>
 <canvas id="bg"></canvas>
 <script>
+const SCALE = 0.33;
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
-
+let buffer = null, bufCtx = null;
 function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  const w = Math.round(window.innerWidth * SCALE);
+  const h = Math.round(window.innerHeight * SCALE);
+  canvas.width = w;
+  canvas.height = h;
+  canvas.style.width = window.innerWidth + "px";
+  canvas.style.height = window.innerHeight + "px";
+  buffer = document.createElement("canvas");
+  buffer.width = w;
+  buffer.height = h;
+  bufCtx = buffer.getContext("2d");
 }
 resize();
 window.addEventListener("resize", resize);
 
-const baseColor = [5, 10, 16];
-const brightColor = [28, 32, 38];
+const baseColor = [10, 14, 18];
+const brightColor = [18, 22, 28];
 const fadePeriod = 20;
 
-function lerp(a, b, t) {
-  return a + (b - a) * t;
+function lerp(a, b, t) { return a + (b - a) * t; }
+function hsv2rgb(h, s, v) {
+  let f = (n, k = (n + h/60)%6) => v - v*s*Math.max(Math.min(k,4-k,1),0);
+  return [f(5)*255, f(3)*255, f(1)*255];
 }
 
 function animate() {
-  const t = (1 - Math.cos(Math.PI * ((performance.now() / 1000) % fadePeriod) / (fadePeriod/2))) / 2;
-
-  const w = canvas.width, h = canvas.height;
+  const now = performance.now() / 1000;
+  // t is now limited to 0.0–0.7, so never goes all the way to bright
+  const t = (1 - Math.cos(Math.PI * ((now % fadePeriod) / (fadePeriod/2)))) / 2 * 0.7;
+  const w = buffer.width, h = buffer.height;
   const cx = w/2, cy = h/2;
   const gradRadius = Math.max(w,h)*0.8;
   const innerRadius = Math.min(w,h)*0.1;
 
-  // --- Manual radial gradient with reduced dither ---
-  const imageData = ctx.createImageData(w, h);
+  let imageData = bufCtx.createImageData(w, h);
   const d = imageData.data;
+  const noiseStrength = 7 + t * 16;
+  const lineSpacing = 3;
+  const lineThickness = 2;
+  const opacity = 0.012;
+
+  const holoStrength = 0.09;
+  const holoSat = 0.10;
+  const holoVal = 0.87;
+  const holoPhaseGlobal = (performance.now() * 0.00325);
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -68,49 +68,47 @@ function animate() {
       let r = Math.sqrt(dx*dx + dy*dy);
       let f = (r - innerRadius) / (gradRadius - innerRadius);
       f = Math.max(0, Math.min(1, f));
-      f += (Math.random()-0.5) * 0.012; // reduced dither for smoothness
+      f += (Math.random()-0.5) * 0.008;
       f = Math.max(0, Math.min(1, f));
       const col1 = baseColor.map((c,i)=>Math.round(lerp(c, brightColor[i], t)));
       const col2 = baseColor.map((c,i)=>Math.round(lerp(brightColor[i], 255, t*0.6)));
-      const rC = Math.round(lerp(col1[0], col2[0], f));
-      const gC = Math.round(lerp(col1[1], col2[1], f));
-      const bC = Math.round(lerp(col1[2], col2[2], f));
+      let rC = Math.round(lerp(col1[0], col2[0], f));
+      let gC = Math.round(lerp(col1[1], col2[1], f));
+      let bC = Math.round(lerp(col1[2], col2[2], f));
+
+      const grain = ((Math.sin(x * 0.22 + y * 0.31 + now*0.9) + 1) * 0.5) * noiseStrength;
+      rC = Math.min(255, rC + grain);
+      gC = Math.min(255, gC + grain);
+      bC = Math.min(255, bC + grain);
+
+      // Holo effect
+      const holoPhase = holoPhaseGlobal + (x - y) * 0.008;
+      const holoHue = (210 + 90*Math.sin(holoPhase)) % 360;
+      const [hr, hg, hb] = hsv2rgb(holoHue, holoSat, holoVal);
+      rC = Math.round(lerp(rC, hr, holoStrength));
+      gC = Math.round(lerp(gC, hg, holoStrength));
+      bC = Math.round(lerp(bC, hb, holoStrength));
+
+      // Scanline
+      if ((y % lineSpacing) < lineThickness) {
+        rC = Math.round(rC * (1-opacity) + 255 * opacity);
+        gC = Math.round(gC * (1-opacity) + 255 * opacity);
+        bC = Math.round(bC * (1-opacity) + 255 * opacity);
+      }
+
       const idx = 4 * (y * w + x);
-      d[idx] = rC;
+      d[idx]   = rC;
       d[idx+1] = gC;
       d[idx+2] = bC;
       d[idx+3] = 255;
     }
   }
 
-  // --- Noise overlay ---
-  const noiseStrength = 10 + t * 32;
-  for (let i = 0; i < d.length; i += 4) {
-    const x = ((i/4) % w), y = Math.floor((i/4) / w);
-    const grain = ((Math.sin(x * 0.22 + y * 0.31 + performance.now()*0.0009) + 1) * 0.5) * noiseStrength;
-    d[i]   = Math.min(255, d[i]   + grain);
-    d[i+1] = Math.min(255, d[i+1] + grain);
-    d[i+2] = Math.min(255, d[i+2] + grain);
-  }
+  bufCtx.putImageData(imageData, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(buffer, 0, 0, canvas.width, canvas.height);
 
-  // --- Ultra-faint scanlines (opacity 0.03) ---
-  const lineSpacing = 3;
-  const lineThickness = 2;
-  const opacity = 0.03; // << TRY 0.01 if you want them even fainter!
-  const lineR = 255, lineG = 255, lineB = 255; // white scanline
-
-  for (let y = 0; y < h; y++) {
-    if ((y % lineSpacing) < lineThickness) {
-      for (let x = 0; x < w; x++) {
-        const idx = 4 * (y * w + x);
-        d[idx]   = Math.round(d[idx]   * (1-opacity) + lineR * opacity);
-        d[idx+1] = Math.round(d[idx+1] * (1-opacity) + lineG * opacity);
-        d[idx+2] = Math.round(d[idx+2] * (1-opacity) + lineB * opacity);
-      }
-    }
-  }
-
-  ctx.putImageData(imageData, 0, 0);
   requestAnimationFrame(animate);
 }
 animate();
