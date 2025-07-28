@@ -120,8 +120,8 @@ void main() {
   float grain = ((sin(uv.x*22.0 + uv.y*31.0 + u_time*0.9*u_speed)+1.0)*0.5) * 0.16;
   color += grain * u_noiseStrength;
 
-  float holoHue = mod(210.0 + 90.0*sin(u_time*0.00325*300.0*u_speed + (uv.x-uv.y)*8.0), 360.0)/360.0;
-  vec3 holo = hsv2rgb(vec3(holoHue, 0.10, 0.87));
+  float holoHue = mod(210.0 + 180.0*sin(u_time*0.00325*300.0*u_speed + (uv.x-uv.y)*8.0), 360.0) / 360.0;
+  vec3 holo = hsv2rgb(vec3(holoHue, 0.25, 0.9));
   color = mix(color, holo, u_holoStrength);
 
   float bigLine = step(0.0, mod(gl_FragCoord.y, 3.0) - 2.0);
