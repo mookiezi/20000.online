@@ -2,33 +2,84 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Lucia ― Ultra Holo Diagonal</title>
+  <title>Lucia ― Ultra Holo Diagonal (Original Scale Default)</title>
   <style>
-    html, body { margin: 0; padding: 0; overflow: hidden; background: #000; }
-    canvas { display: block; width: 100vw; height: 100vh; }
-    #controls { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.5); padding: 10px; color:#fff; font-family:sans-serif; font-size:12px; border-radius:8px; }
-    #controls label { display:block; margin-bottom:4px; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+    #controls {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      background: rgba(0,0,0,0.85);
+      padding: 12px 0;
+      color: #fff;
+      border-radius: 0;
+    }
+    #controls label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    #controls label span {
+      margin-bottom: 10px; /* moves the text up above the slider */
+    }
+    #scaleValue {
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 14px;
+      align-self: center;
+    }
   </style>
 </head>
 <body>
 <canvas id="glcanvas"></canvas>
+
 <div id="controls">
-  <label>Holo Strength <input id="holoStrength" type="range" min="0" max="0.3" step="0.01" value="0.09"></label>
-  <label>Noise Strength <input id="noiseStrength" type="range" min="0" max="0.2" step="0.01" value="0.07"></label>
-  <label>Brightness <input id="brightness" type="range" min="0" max="1.5" step="0.01" value="1"></label>
-  <label>Speed <input id="speed" type="range" min="0" max="3" step="0.01" value="1"></label>
+  <label><span>Holo</span><input id="holoStrength" type="range" min="0" max="0.3" step="0.01" value="0.09"></label>
+  <label><span>Noise</span><input id="noiseStrength" type="range" min="0" max="0.2" step="0.01" value="0.07"></label>
+  <label><span>Bright</span><input id="brightness" type="range" min="0" max="1.5" step="0.01" value="1"></label>
+  <label><span>Speed</span><input id="speed" type="range" min="0" max="3" step="0.01" value="1"></label>
+  <label><span>Scale</span><input id="scaleSlider" type="range" min="0.75" max="3.0" step="0.05" value="3.0"></label>
+  <span id="scaleValue">Scale: 3.00</span>
 </div>
+
 <script>
 const canvas = document.getElementById("glcanvas");
 const gl = canvas.getContext("webgl");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-gl.viewport(0, 0, canvas.width, canvas.height);
 
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+let scaleFactor = 3.0; // Default to original size
+
+function resizeCanvas() {
+  canvas.width = Math.floor(window.innerWidth * (scaleFactor / 3.0));
+  canvas.height = Math.floor(window.innerHeight * (scaleFactor / 3.0));
   gl.viewport(0, 0, canvas.width, canvas.height);
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+const scaleSlider = document.getElementById("scaleSlider");
+const scaleValue = document.getElementById("scaleValue");
+
+scaleSlider.addEventListener("input", (e) => {
+  scaleFactor = parseFloat(e.target.value);
+  scaleValue.textContent = "Scale: " + scaleFactor.toFixed(2);
+  resizeCanvas();
 });
 
 const vertexShaderSource = `
@@ -48,7 +99,6 @@ uniform float u_speed;
 float random(vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
 }
-
 vec3 hsv2rgb(vec3 c) {
   vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0,4,2),6.0)-3.0)-1.0,0.0,1.0);
   rgb = rgb*rgb*(3.0-2.0*rgb);
@@ -61,13 +111,13 @@ void main() {
   vec2 pos = uv-center;
   float r = length(pos)*2.0;
 
-  float t = (1.0-cos(3.1415*mod(u_time*u_speed,20.0)/10.0))*0.35;
+  float t = 0.35 * (0.5 + 0.5*sin(u_time * 0.2 * u_speed));
 
   vec3 baseColor = mix(vec3(10,14,18)/255.0, vec3(18,22,28)/255.0, t);
   vec3 brightColor = mix(baseColor, vec3(1.0), t*0.6);
   vec3 color = mix(baseColor, brightColor, smoothstep(0.1,0.8,r));
 
-  float grain = ((sin(uv.x*22.0 + uv.y*31.0 + u_time*0.9*u_speed)+1.0)*0.5) * (0.07 + t*0.16);
+  float grain = ((sin(uv.x*22.0 + uv.y*31.0 + u_time*0.9*u_speed)+1.0)*0.5) * 0.16;
   color += grain * u_noiseStrength;
 
   float holoHue = mod(210.0 + 90.0*sin(u_time*0.00325*300.0*u_speed + (uv.x-uv.y)*8.0), 360.0)/360.0;
@@ -104,9 +154,9 @@ function createProgram(gl, vShader, fShader) {
   return program;
 }
 
-const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-const program = createProgram(gl, vertexShader, fragmentShader);
+const vShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+const fShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+const program = createProgram(gl, vShader, fShader);
 
 const posLoc = gl.getAttribLocation(program, "a_position");
 const resLoc = gl.getUniformLocation(program, "u_resolution");
