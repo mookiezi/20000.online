@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Animated Gradient Noise</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<script>
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+// You can customize these:
+const baseColor = [5, 10, 16];   // R,G,B for the darkest color (hex: #050a10)
+const brightColor = [28, 32, 38];// R,G,B for brightest (hex: #1c2026)
+const fadePeriod = 20;           // seconds per full fade cycle
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function animate() {
+  const t = (1 - Math.cos(Math.PI * ((performance.now() / 1000) % fadePeriod) / (fadePeriod/2))) / 2;
+
+  // Gradient background
+  const w = canvas.width, h = canvas.height;
+  const cx = w/2, cy = h/2;
+  const grad = ctx.createRadialGradient(cx, cy, Math.min(w,h)*0.1, cx, cy, Math.max(w,h)*0.8);
+  // Animate between two colors
+  const col1 = baseColor.map((c,i)=>Math.round(lerp(c, brightColor[i], t)));
+  const col2 = baseColor.map((c,i)=>Math.round(lerp(brightColor[i], 255, t*0.6)));
+  grad.addColorStop(0, `rgb(${col1[0]},${col1[1]},${col1[2]})`);
+  grad.addColorStop(1, `rgb(${col2[0]},${col2[1]},${col2[2]})`);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+
+  // Noise overlay (simple grain, fast; not Perlin, but visually similar for faint static)
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const d = imageData.data;
+  // Pulse the noise strength with t for breathing effect
+  const noiseStrength = 10 + t * 32;
+  for (let i = 0; i < d.length; i += 4) {
+    // Basic pseudo-random but "moves" over time
+    const x = ((i/4) % w), y = Math.floor((i/4) / w);
+    // Use Math.random() for quick preview; replace with real Perlin if you want
+    const grain = ((Math.sin(x * 0.22 + y * 0.31 + performance.now()*0.0009) + 1) * 0.5) * noiseStrength;
+    d[i]   = Math.min(255, d[i]   + grain); // R
+    d[i+1] = Math.min(255, d[i+1] + grain); // G
+    d[i+2] = Math.min(255, d[i+2] + grain); // B
+    // alpha stays as is
+  }
+  ctx.putImageData(imageData, 0, 0);
+
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
