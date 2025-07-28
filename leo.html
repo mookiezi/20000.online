@@ -2,24 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Even Scanlines Gradient Static (Ultra Smooth Fade)</title>
+  <title>Ultra FPS Scanlines</title>
   <style>
-    html, body {
-      height: 100%; width: 100vw; margin: 0; padding: 0; overflow: hidden;
-      background: #000;
-    }
-    body {
-      width: 100vw; height: 100vh; overflow: hidden;
-    }
-    canvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-      position: fixed;
-      top: 0; left: 0;
-      z-index: 1;
-      pointer-events: none;
-    }
+    html, body { margin:0; padding:0; width:100vw; height:100vh; background:#000; overflow:hidden; }
+    body { width:100vw; height:100vh; }
+    canvas { display:block; width:100vw; height:100vh; position:fixed; top:0; left:0; z-index:1; pointer-events:none; }
   </style>
 </head>
 <body>
@@ -27,12 +14,15 @@
 <script>
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
+const SCALE = 0.25;
+
 function resize() {
-  // Use devicePixelRatio for crisp animation on HiDPI screens
   const dpr = window.devicePixelRatio || 1;
-  canvas.width = window.innerWidth * dpr;
-  canvas.height = window.innerHeight * dpr;
-  ctx.setTransform(dpr,0,0,dpr,0,0);
+  canvas.width = Math.round(window.innerWidth * SCALE * dpr);
+  canvas.height = Math.round(window.innerHeight * SCALE * dpr);
+  canvas.style.width = window.innerWidth + "px";
+  canvas.style.height = window.innerHeight + "px";
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 resize();
 window.addEventListener("resize", resize);
@@ -42,15 +32,10 @@ const brightColor = [28, 32, 38];
 const fadePeriod = 24;
 
 function lerp(a, b, t) { return a + (b - a) * t; }
-// Smootherstep for even smoother interpolation
-function smootherstep(t) {
-  return t * t * t * (t * (t * 6 - 15) + 10);
-}
+function smootherstep(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
 
 function animate() {
-  // Use a long period and smootherstep for ultra-smooth transition
   const now = performance.now() / 1000;
-  // Two fade cycles with slightly different periods
   const tA = smootherstep((1 - Math.cos(Math.PI * ((now % fadePeriod) / (fadePeriod/2)))) / 2);
   const tB = smootherstep((1 - Math.cos(Math.PI * (((now+2) % (fadePeriod*1.3)) / (fadePeriod*0.65)))) / 2);
 
@@ -59,37 +44,30 @@ function animate() {
   const gradRadius = Math.max(w,h)*0.8;
   const innerRadius = Math.min(w,h)*0.1;
 
-  // --- Manual gradient with dither ---
-  const imageData = ctx.createImageData(w, h);
+  let imageData = ctx.createImageData(w, h);
   const d = imageData.data;
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
-      // Distance from center, normalized 0 (inner) to 1 (outer)
       const dx = x - cx, dy = y - cy;
       let r = Math.sqrt(dx*dx + dy*dy);
       let f = (r - innerRadius) / (gradRadius - innerRadius);
-      f = Math.max(0, Math.min(1, f));
+      f = Math.max(0, Math.min(1, f)); // Clamp
+      // NO DITHER for max speed
 
-      // Dither: add small random value, scaled to one color step
-      let dither = (Math.random()-0.5) * 0.028; // less grain, but less banding
-      f = Math.max(0, Math.min(1, f + dither));
-
-      // Colors (ultra smooth fade)
       const col1 = baseColor.map((c,i)=>Math.round(lerp(c, brightColor[i], tA)));
       const col2 = baseColor.map((c,i)=>Math.round(lerp(brightColor[i], 255, tB*0.55)));
       const rC = Math.round(lerp(col1[0], col2[0], f));
       const gC = Math.round(lerp(col1[1], col2[1], f));
       const bC = Math.round(lerp(col1[2], col2[2], f));
-
       const idx = 4 * (y * w + x);
       d[idx] = rC;
       d[idx+1] = gC;
       d[idx+2] = bC;
-      d[idx+3] = 255; // alpha
+      d[idx+3] = 255;
     }
   }
 
-  // --- Scanlines (2px thick as last time) ---
+  // --- Scanlines ---
   const lineSpacing = 3;
   const lineThickness = 2;
   const noiseStrength = 24 + tA * 24;
