@@ -1,117 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Lucia ― Ultra Holo Diagonal</title>
+  <meta charset="UTF-8" />
+  <title>Lucia ― Ultra Holo Diagonal (Adjustable)</title>
   <style>
-    html, body { height: 100%; width: 100vw; margin: 0; padding: 0; overflow: hidden; background: #000; }
-    body { width: 100vw; height: 100vh; }
-    canvas { display: block; width: 100vw; height: 100vh; position: fixed; top:0; left:0; z-index:1; pointer-events:none; }
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #000; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    #fps { position: fixed; top: 10px; left: 10px; color: #0f0; font-family: monospace; font-size: 14px; background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px; }
+    #controls { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.5); padding: 10px; color:#fff; font-family:sans-serif; font-size:12px; border-radius:8px; }
+    #controls label { display:block; margin-bottom:4px; }
   </style>
 </head>
 <body>
-<canvas id="bg"></canvas>
+<canvas id="glcanvas"></canvas>
+<div id="fps">FPS: 0</div>
+<div id="controls">
+  <label>Holo Strength <input id="holoStrength" type="range" min="0" max="0.3" step="0.01" value="0.09"></label>
+  <label>Noise Strength <input id="noiseStrength" type="range" min="0" max="0.2" step="0.01" value="0.07"></label>
+  <label>Brightness <input id="brightness" type="range" min="0" max="1.5" step="0.01" value="1"></label>
+  <label>Speed <input id="speed" type="range" min="0" max="3" step="0.01" value="1"></label>
+</div>
 <script>
-const SCALE = 0.33;
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
-let buffer = null, bufCtx = null;
-function resize() {
-  const w = Math.round(window.innerWidth * SCALE);
-  const h = Math.round(window.innerHeight * SCALE);
-  canvas.width = w;
-  canvas.height = h;
-  canvas.style.width = window.innerWidth + "px";
-  canvas.style.height = window.innerHeight + "px";
-  buffer = document.createElement("canvas");
-  buffer.width = w;
-  buffer.height = h;
-  bufCtx = buffer.getContext("2d");
+const canvas = document.getElementById("glcanvas");
+const gl = canvas.getContext("webgl");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+gl.viewport(0, 0, canvas.width, canvas.height);
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  gl.viewport(0, 0, canvas.width, canvas.height);
+});
+
+const vertexShaderSource = `
+attribute vec2 a_position;
+void main() { gl_Position = vec4(a_position, 0.0, 1.0); }
+`;
+
+const fragmentShaderSource = `
+precision highp float;
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform float u_holoStrength;
+uniform float u_noiseStrength;
+uniform float u_brightness;
+uniform float u_speed;
+
+float random(vec2 st) {
+  return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
 }
-resize();
-window.addEventListener("resize", resize);
 
-const baseColor = [10, 14, 18];
-const brightColor = [18, 22, 28];
-const fadePeriod = 20;
-
-function lerp(a, b, t) { return a + (b - a) * t; }
-function hsv2rgb(h, s, v) {
-  let f = (n, k = (n + h/60)%6) => v - v*s*Math.max(Math.min(k,4-k,1),0);
-  return [f(5)*255, f(3)*255, f(1)*255];
+vec3 hsv2rgb(vec3 c) {
+  vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0,4,2),6.0)-3.0)-1.0,0.0,1.0);
+  rgb = rgb*rgb*(3.0-2.0*rgb);
+  return c.z * mix(vec3(1.0), rgb, c.y);
 }
 
-function animate() {
-  const now = performance.now() / 1000;
-  // t is now limited to 0.0–0.7, so never goes all the way to bright
-  const t = (1 - Math.cos(Math.PI * ((now % fadePeriod) / (fadePeriod/2)))) / 2 * 0.7;
-  const w = buffer.width, h = buffer.height;
-  const cx = w/2, cy = h/2;
-  const gradRadius = Math.max(w,h)*0.8;
-  const innerRadius = Math.min(w,h)*0.1;
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+  vec2 center = vec2(0.5,0.5);
+  vec2 pos = uv-center;
+  float r = length(pos)*2.0;
 
-  let imageData = bufCtx.createImageData(w, h);
-  const d = imageData.data;
-  const noiseStrength = 7 + t * 16;
-  const lineSpacing = 3;
-  const lineThickness = 2;
-  const opacity = 0.012;
+  float t = (1.0-cos(3.1415*mod(u_time*u_speed,20.0)/10.0))*0.35;
 
-  const holoStrength = 0.09;
-  const holoSat = 0.10;
-  const holoVal = 0.87;
-  const holoPhaseGlobal = (performance.now() * 0.00325);
+  vec3 baseColor = mix(vec3(10,14,18)/255.0, vec3(18,22,28)/255.0, t);
+  vec3 brightColor = mix(baseColor, vec3(1.0), t*0.6);
+  vec3 color = mix(baseColor, brightColor, smoothstep(0.1,0.8,r));
 
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const dx = x - cx, dy = y - cy;
-      let r = Math.sqrt(dx*dx + dy*dy);
-      let f = (r - innerRadius) / (gradRadius - innerRadius);
-      f = Math.max(0, Math.min(1, f));
-      f += (Math.random()-0.5) * 0.008;
-      f = Math.max(0, Math.min(1, f));
-      const col1 = baseColor.map((c,i)=>Math.round(lerp(c, brightColor[i], t)));
-      const col2 = baseColor.map((c,i)=>Math.round(lerp(brightColor[i], 255, t*0.6)));
-      let rC = Math.round(lerp(col1[0], col2[0], f));
-      let gC = Math.round(lerp(col1[1], col2[1], f));
-      let bC = Math.round(lerp(col1[2], col2[2], f));
+  // noise
+  float grain = ((sin(uv.x*22.0 + uv.y*31.0 + u_time*0.9*u_speed)+1.0)*0.5) * (0.07 + t*0.16);
+  color += grain * u_noiseStrength;
 
-      const grain = ((Math.sin(x * 0.22 + y * 0.31 + now*0.9) + 1) * 0.5) * noiseStrength;
-      rC = Math.min(255, rC + grain);
-      gC = Math.min(255, gC + grain);
-      bC = Math.min(255, bC + grain);
+  // holo hue shift
+  float holoHue = mod(210.0 + 90.0*sin(u_time*0.00325*300.0*u_speed + (uv.x-uv.y)*8.0), 360.0)/360.0;
+  vec3 holo = hsv2rgb(vec3(holoHue, 0.10, 0.87));
+  color = mix(color, holo, u_holoStrength);
 
-      // Holo effect
-      const holoPhase = holoPhaseGlobal + (x - y) * 0.008;
-      const holoHue = (210 + 90*Math.sin(holoPhase)) % 360;
-      const [hr, hg, hb] = hsv2rgb(holoHue, holoSat, holoVal);
-      rC = Math.round(lerp(rC, hr, holoStrength));
-      gC = Math.round(lerp(gC, hg, holoStrength));
-      bC = Math.round(lerp(bC, hb, holoStrength));
+  // big horizontal scanlines
+  float bigLine = step(0.0, mod(gl_FragCoord.y, 3.0) - 2.0);
+  color = mix(color, vec3(1.0), (1.0-bigLine)*0.012);
 
-      // Scanline
-      if ((y % lineSpacing) < lineThickness) {
-        rC = Math.round(rC * (1-opacity) + 255 * opacity);
-        gC = Math.round(gC * (1-opacity) + 255 * opacity);
-        bC = Math.round(bC * (1-opacity) + 255 * opacity);
-      }
+  // extra CRT fine scanlines
+  float fineScan = 0.5 + 0.5*sin(gl_FragCoord.y*3.1415);
+  color *= mix(0.95, 1.05, fineScan);
 
-      const idx = 4 * (y * w + x);
-      d[idx]   = rC;
-      d[idx+1] = gC;
-      d[idx+2] = bC;
-      d[idx+3] = 255;
-    }
+  // BIG diagonal stripes (like 1st image)
+  float diagBig = step(0.45, fract((gl_FragCoord.x + gl_FragCoord.y)*0.03));
+  color = mix(color, holo, (1.0-diagBig)*0.08);
+
+  // SMALL diagonal stripes
+  float diagSmall = step(0.5, fract((gl_FragCoord.x + gl_FragCoord.y)*0.12));
+  color = mix(color, holo, (1.0-diagSmall)*0.05);
+
+  gl_FragColor = vec4(color * u_brightness, 1.0);
+}
+`;
+
+function createShader(gl, type, source) {
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+    console.error(gl.getShaderInfoLog(shader));
+  return shader;
+}
+function createProgram(gl, vShader, fShader) {
+  const program = gl.createProgram();
+  gl.attachShader(program, vShader);
+  gl.attachShader(program, fShader);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+    console.error(gl.getProgramInfoLog(program));
+  return program;
+}
+
+const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+const program = createProgram(gl, vertexShader, fragmentShader);
+
+const posLoc = gl.getAttribLocation(program, "a_position");
+const resLoc = gl.getUniformLocation(program, "u_resolution");
+const timeLoc = gl.getUniformLocation(program, "u_time");
+const holoLoc = gl.getUniformLocation(program, "u_holoStrength");
+const noiseLoc = gl.getUniformLocation(program, "u_noiseStrength");
+const brightLoc = gl.getUniformLocation(program, "u_brightness");
+const speedLoc = gl.getUniformLocation(program, "u_speed");
+
+const buffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+  -1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1
+]), gl.STATIC_DRAW);
+
+gl.useProgram(program);
+gl.enableVertexAttribArray(posLoc);
+gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+let fpsElem = document.getElementById("fps");
+let last = performance.now(), frames = 0;
+
+function render(time) {
+  frames++;
+  if (time - last >= 1000) {
+    fpsElem.textContent = "FPS: " + frames;
+    frames = 0;
+    last = time;
   }
 
-  bufCtx.putImageData(imageData, 0, 0);
-  ctx.imageSmoothingEnabled = true;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(buffer, 0, 0, canvas.width, canvas.height);
-
-  requestAnimationFrame(animate);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.uniform2f(resLoc, canvas.width, canvas.height);
+  gl.uniform1f(timeLoc, time*0.001);
+  gl.uniform1f(holoLoc, parseFloat(holoStrength.value));
+  gl.uniform1f(noiseLoc, parseFloat(noiseStrength.value));
+  gl.uniform1f(brightLoc, parseFloat(brightness.value));
+  gl.uniform1f(speedLoc, parseFloat(speed.value));
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+  requestAnimationFrame(render);
 }
-animate();
+requestAnimationFrame(render);
 </script>
 </body>
 </html>
