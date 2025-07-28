@@ -26,7 +26,6 @@
       background: rgba(0,0,0,0.85);
       padding: 12px 0;
       color: #fff;
-      border-radius: 0;
     }
     #controls label {
       display: flex;
@@ -37,7 +36,7 @@
       font-size: 14px;
     }
     #controls label span {
-      margin-bottom: 10px; /* moves the text up above the slider */
+      margin-bottom: 10px;
     }
     #scaleValue {
       font-family: monospace;
@@ -63,7 +62,7 @@
 const canvas = document.getElementById("glcanvas");
 const gl = canvas.getContext("webgl");
 
-let scaleFactor = 3.0; // Default to original size
+let scaleFactor = 3.0;
 
 function resizeCanvas() {
   canvas.width = Math.floor(window.innerWidth * (scaleFactor / 3.0));
@@ -95,6 +94,7 @@ uniform float u_holoStrength;
 uniform float u_noiseStrength;
 uniform float u_brightness;
 uniform float u_speed;
+uniform float u_t; // <-- precomputed fade value
 
 float random(vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
@@ -111,7 +111,7 @@ void main() {
   vec2 pos = uv-center;
   float r = length(pos)*2.0;
 
-  float t = 0.35 * (0.5 + 0.5*sin(u_time * 0.2 * u_speed));
+  float t = u_t; // use uniform instead of per-pixel calc
 
   vec3 baseColor = mix(vec3(10,14,18)/255.0, vec3(18,22,28)/255.0, t);
   vec3 brightColor = mix(baseColor, vec3(1.0), t*0.6);
@@ -165,6 +165,7 @@ const holoLoc = gl.getUniformLocation(program, "u_holoStrength");
 const noiseLoc = gl.getUniformLocation(program, "u_noiseStrength");
 const brightLoc = gl.getUniformLocation(program, "u_brightness");
 const speedLoc = gl.getUniformLocation(program, "u_speed");
+const tLoc = gl.getUniformLocation(program, "u_t");
 
 const buffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -180,12 +181,18 @@ gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 function render(time) {
   gl.viewport(0, 0, canvas.width, canvas.height);
   gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // compute t ONCE per frame
+  const t = 0.35 * (0.5 + 0.5 * Math.sin(time * 0.001 * 0.2 * parseFloat(speed.value)));
+
   gl.uniform2f(resLoc, canvas.width, canvas.height);
   gl.uniform1f(timeLoc, time*0.001);
   gl.uniform1f(holoLoc, parseFloat(holoStrength.value));
   gl.uniform1f(noiseLoc, parseFloat(noiseStrength.value));
   gl.uniform1f(brightLoc, parseFloat(brightness.value));
   gl.uniform1f(speedLoc, parseFloat(speed.value));
+  gl.uniform1f(tLoc, t);
+
   gl.drawArrays(gl.TRIANGLES, 0, 6);
   requestAnimationFrame(render);
 }
