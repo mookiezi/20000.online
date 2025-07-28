@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style id="dynamic-style">
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+  </style>
+  <style>
+    /* Bell-curve-like opacity with last 3% fade-out and variable peak */
+    @keyframes particleFade {
+      0%   { opacity: 0; }
+      20%  { opacity: var(--particle-opacity); }
+      97%  { opacity: var(--particle-opacity); }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center overflow-hidden">
+
+  <div class="dust-particles"></div>
+
+  <div class="relative z-10 text-center px-4">
+    <h1 id="fade-text" class="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tighter">
+      20000.online
+    </h1>
+  </div>
+
+  <style>
+    .custom-text { color: #EEEFFF; }
+  </style>
+
+  <div class="fixed bottom-4 right-4 opacity-1 text-sm custom-text" style="transform: translateX(-4px);">
+    @discord
+  </div>
+
+  <script>
+    const styleTag = document.getElementById("dynamic-style");
+    const fadeText = document.getElementById("fade-text");
+    let value = 250;
+
+    function updateKeyframes() {
+      styleTag.innerHTML = `
+        @keyframes fadeInOut {
+          0% { color: rgba(255,255,255,0.05); }
+          1.25% { color: rgba(255,255,255,0.5); }
+          80.5%,89.5% { color: rgba(245,252,${value},0.9); }
+          98.75% { color: rgba(255,255,250,0.5); }
+          100% { color: rgba(250,255,255,0.05); }
+        }
+        .fading-text {
+          animation: fadeInOut 6s cubic-bezier(0.4,0,0.2,1) infinite;
+          font-family: 'JetBrains Mono Thin', monospace;
+        }
+        body { background: #ffffff; }
+        .dust-particles {
+          position: fixed; top:0; left:0;
+          width:100%; height:100%;
+          pointer-events:none; z-index:1;
+          overflow:hidden;
+        }
+        .particle {
+          position:absolute;
+          background-color:#111111;
+          border-radius:50%;
+          animation:particleFade 5.5s linear forwards;
+          transition:transform 3.5s linear;
+        }
+      `;
+      fadeText.className =
+        "fading-text text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tighter";
+    }
+
+    updateKeyframes();
+    setInterval(() => { value++; updateKeyframes(); }, 6000);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const container = document.querySelector(".dust-particles");
+      const MAX_PARTICLES = 15;
+
+      function spawnParticle() {
+        if (container.childElementCount >= MAX_PARTICLES) return;
+
+        const p = document.createElement("span");
+        p.className = "particle";
+
+        // Random size
+        const size = Math.random() * 3 + 2;
+        p.style.width = `${size}px`;
+        p.style.height = `${size}px`;
+
+        // Random peak opacity stored as CSS variable
+        const peakOpacity = (Math.random() * 0.3 + 0.2).toFixed(2);
+        p.style.setProperty("--particle-opacity", peakOpacity);
+
+        const startX = Math.random() * window.innerWidth;
+        const startY = Math.random() * window.innerHeight;
+        p.style.left = `${startX}px`;
+        p.style.top = `${startY}px`;
+
+        const angle = Math.random() * 2 * Math.PI;
+        const dist = 400 + Math.random() * 250;
+        const endX = startX + Math.cos(angle) * dist;
+        const endY = startY + Math.sin(angle) * dist;
+        const curve = (Math.random() * 10 - 5).toFixed(2);
+
+        container.appendChild(p);
+        p.style.transform = `translate(0px,0px) rotate(0deg)`;
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            p.style.transform =
+              `translate(${endX - startX}px,${endY - startY}px) rotate(${curve}deg)`;
+          });
+        });
+
+        setTimeout(() => {
+          if (container.contains(p)) container.removeChild(p);
+        }, 1050);
+      }
+
+      function loopParticle(n) {
+        if (n <= 0) return;
+        spawnParticle();
+        setTimeout(() => loopParticle(n - 1), 1000);
+      }
+
+      for (let i = 0; i < MAX_PARTICLES; i++) {
+        setTimeout(() => loopParticle(3), Math.random() * 1500);
+      }
+    });
+  </script>
+</body>
+</html>
