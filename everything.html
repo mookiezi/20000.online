@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Reader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .word-display {
+            animation: fadeIn 0.1s ease-in;
+        }
+    </style>
+</head>
+<body class="bg-white h-screen flex flex-col items-center justify-center p-4">
+    <div class="max-w-4xl w-full text-center">
+        
+        <div class="mb-8 flex justify-center">
+            <div class="word-display text-6xl font-bold text-black h-24 flex items-center justify-center w-full" id="wordDisplay"></div>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <div class="flex items-center gap-2">
+                <label for="speed" class="text-black">Words per minute:</label>
+                <input type="range" id="speed" min="100" max="1000" value="300" class="w-32">
+                <span id="speedValue" class="font-bold">300</span>
+            </div>
+            <button id="playPauseBtn" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition">
+                Start
+            </button>
+        </div>
+        
+        <div class="text-left text-black mb-8 hidden" id="fullTextContainer">
+            <h2 class="text-xl font-bold mb-2">Full Text:</h2>
+            <p id="fullText"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const text = "Life on Earth revolves around a handful of undeniable truths that everyone knows are important, like the fact that we need air to breathe, water to drink, food to eat, and shelter to stay safe from the elements, and that the Sun provides light and energy for all life, enabling plants to grow through photosynthesis, which in turn sustains the entire food chain from the smallest insects to the largest mammals, and that gravity holds us to the planet and keeps the Moon orbiting Earth, influencing tides and stabilizing the planet’s axial tilt, while the seasons change as Earth revolves around the Sun, and time marches forward as we divide it into seconds, minutes, hours, days, months, and years, and people everywhere rely on language to communicate ideas, express feelings, and build relationships, just as they rely on tools and technology to improve their quality of life, from the wheel and fire to electricity, computers, and the internet, which connects billions of people, allowing instant communication, knowledge sharing, and global trade, and money whether in coins, paper, or digital form serves as a universal system of value exchange, shaping economies and livelihoods, while governments create laws to maintain order and security, and science seeks to understand the universe through observation and experimentation, uncovering fundamental concepts like atoms, molecules, energy, and the laws of motion, which gave rise to technologies such as engines, airplanes, and space travel, sending humans to the Moon and probes beyond the Solar System, and speaking of the Solar System, Earth is just one planet orbiting the Sun along with Mercury, Venus, Mars, Jupiter, Saturn, Uranus, and Neptune, while beyond that lie countless stars in the Milky Way galaxy, itself just one of billions of galaxies in an expanding universe that began with the Big Bang, and on our planet, nature thrives in ecosystems made up of plants, animals, fungi, and microbes, all interconnected in cycles like carbon, nitrogen, and water, and humans Homo sapiens developed agriculture, leading to civilizations with cities, writing, art, and culture, and throughout history, societies rose and fell, from Mesopotamia, Egypt, Greece, and Rome to empires in China, India, the Americas, and Africa, all shaping language, philosophy, science, and governance, while religions and belief systems like Christianity, Islam, Hinduism, Buddhism, and countless others sought to explain existence and morality, and as technology advanced, humanity created printing presses, steam engines, telegraphs, telephones, cars, planes, rockets, computers, and now artificial intelligence, which learns from vast datasets to generate language, images, and even solve complex problems, while medicine advanced from herbal remedies to vaccines, antibiotics, surgery, and gene editing, extending human life spans, and culture evolved through music, literature, film, and the internet, shaping identities and spreading ideas faster than ever before, even as the world grapples with challenges like climate change, biodiversity loss, pollution, pandemics, wars, inequality, and the ethics of new technologies, while everyday life remains grounded in universal experiences like eating, sleeping, learning, working, loving, raising families, and dreaming of better futures, and everywhere you go. While humanity continues to explore the unknown from outer space to the limits of artifical intelligence driven by curiosity and survival, building upon millennia of knowledge passed down through language, writing, and now digital media stored in servers around the world, so that no matter where you are, people understand that some things matters.";
+            
+            const words = text.split(/\s+/);
+            const wordDisplay = document.getElementById('wordDisplay');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const speedSlider = document.getElementById('speed');
+            const speedValue = document.getElementById('speedValue');
+            const fullTextContainer = document.getElementById('fullTextContainer');
+            const fullText = document.getElementById('fullText');
+            
+            fullText.textContent = text;
+            
+            let currentIndex = 0;
+            let intervalId = null;
+            let isPlaying = false;
+            
+            function updateSpeed() {
+                const wpm = parseInt(speedSlider.value);
+                speedValue.textContent = wpm;
+                
+                if (isPlaying) {
+                    clearInterval(intervalId);
+                    startReading();
+                }
+            }
+            
+            function startReading() {
+                const wpm = parseInt(speedSlider.value);
+                const delay = 60000 / wpm; // Convert WPM to milliseconds delay
+                
+                intervalId = setInterval(() => {
+                    if (currentIndex >= words.length) {
+                        stopReading();
+                        return;
+                    }
+                    
+                    wordDisplay.textContent = words[currentIndex];
+                    currentIndex++;
+                    
+                    // Add fade-in animation by removing and adding the class
+                    wordDisplay.classList.remove('word-display');
+                    void wordDisplay.offsetWidth; // Trigger reflow
+                    wordDisplay.classList.add('word-display');
+                    
+                }, delay);
+            }
+            
+            function stopReading() {
+                clearInterval(intervalId);
+                isPlaying = false;
+                playPauseBtn.textContent = 'Start';
+                currentIndex = 0;
+            }
+            
+            function togglePlayPause() {
+                if (isPlaying) {
+                    clearInterval(intervalId);
+                    isPlaying = false;
+                    playPauseBtn.textContent = 'Continue';
+                } else {
+                    if (currentIndex >= words.length) {
+                        currentIndex = 0; // Reset if we reached the end
+                    }
+                    isPlaying = true;
+                    playPauseBtn.textContent = 'Pause';
+                    startReading();
+                }
+            }
+            
+            speedSlider.addEventListener('input', updateSpeed);
+            playPauseBtn.addEventListener('click', togglePlayPause);
+            
+            // Show full text when clicking on the word display
+            wordDisplay.addEventListener('click', () => {
+                fullTextContainer.classList.toggle('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
