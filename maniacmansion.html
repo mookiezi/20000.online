@@ -129,8 +129,16 @@
     .dataTables_wrapper .dataTables_paginate {
       text-align: left !important;
       float: left !important;
-      display: flex !important;
-      align-items: center;
+      display: inline-block !important;
+      white-space: nowrap !important;
+      vertical-align: middle;
+    }
+
+    /* DataTables v2 container support */
+    .dt-container .dt-paging {
+      display: inline-block !important;
+      white-space: nowrap !important;
+      vertical-align: middle;
     }
 
     /* Base pagination button style */
@@ -231,7 +239,6 @@
                 function addJumpTo(pager) {
                   if (!pager) return;
 
-                  // Create inline container right after the page buttons
                   const wrap = document.createElement('span');
                   wrap.className = 'page-jump-inline';
                   wrap.innerHTML = `
@@ -241,7 +248,14 @@
                     <button type="button" class="paginate_button">Go</button>
                   `;
 
-                  pager.appendChild(wrap);
+                  // Prefer to place AFTER the "Next" button; fall back to end of number span
+                  const nextBtn = pager.querySelector('.paginate_button.next, .dt-paging-button.next');
+                  if (nextBtn && nextBtn.parentNode === pager) {
+                    nextBtn.after(wrap);
+                  } else {
+                    const numberSpan = pager.querySelector('span'); // DT v1 number group
+                    (numberSpan || pager).appendChild(wrap);
+                  }
 
                   const input = wrap.querySelector('input');
                   const total = wrap.querySelector('.page-jump-total');
@@ -265,7 +279,6 @@
                   btn.addEventListener('click', go);
                   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
 
-                  // initial + keep in sync when user clicks default pager
                   sync();
                   api.on('draw', sync);
                 }
