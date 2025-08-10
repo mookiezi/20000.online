@@ -1,6 +1,5 @@
 <!doctype html>
 <html>
-
 <head>
   <meta charset="utf-8" />
   <title>CSV Explorer</title>
@@ -8,7 +7,8 @@
 
   <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-dt/css/jquery.dataTables.min.css">
-
+  
+  <!-- Dark theme overrides -->
   <style>
     body {
       font-family: system-ui, Segoe UI, Arial, sans-serif;
@@ -32,17 +32,22 @@
     table.dataTable th,
     table.dataTable td {
       white-space: pre-wrap;
+      /* preserve newlines */
       border-color: #333 !important;
       background-color: #000 !important;
       color: #fff !important;
     }
 
     table.dataTable thead {
-      display: none !important;
-      /* hide column names */
+      background-color: #000 !important;
     }
 
-    .dataTables_filter input,
+    .dataTables_filter input {
+      background-color: #111 !important;
+      color: #fff !important;
+      border: 1px solid #333 !important;
+    }
+
     .dataTables_length select {
       background-color: #111 !important;
       color: #fff !important;
@@ -82,9 +87,13 @@
         transform: rotate(360deg);
       }
     }
+
+    table.dataTable thead {
+      display: none !important;
+      /* hides column name */
+    }
   </style>
 </head>
-
 <body>
   <div id="loading">
     <div class="spinner"></div>
@@ -99,82 +108,39 @@
   <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 
   <script>
-    const GZ_URL = "final.csv.gz"; // change to your file
-    let table;
+    const GZ_URL = "final.csv.gz";  // change to your file
 
-    function getPapaConfig() {
-      return {
-        header: false, // raw arrays, no headers
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        worker: true,
-        chunk: (results) => {
-          if (!table) {
-            table = new DataTable('#tbl', {
-              data: results.data,
+    async function loadCSVFromGzip(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buf = await res.arrayBuffer();
+      const uint8 = new Uint8Array(buf);
+      const decompressed = window.pako.ungzip(uint8);
+      return new TextDecoder("utf-8").decode(decompressed);
+    }
+
+    (async () => {
+      try {
+        const csvText = await loadCSVFromGzip(GZ_URL);
+        Papa.parse(csvText, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          complete: (res) => {
+            const data = res.data;
+            const columns = Object.keys(data[0] || {}).map(k => ({ title: k, data: k }));
+            new DataTable('#tbl', {
+              data,
+              columns,
               paging: true,
               searching: true,
               info: true,
               deferRender: true,
               dom: '<"top"lfp>rt<"bottom"lfp><"clear">'
             });
-          } else {
-            table.rows.add(results.data).draw(false);
+            document.getElementById('loading').style.display = 'none';
           }
-        },
-        complete: () => {
-          document.getElementById('loading').style.display = 'none';
-        }
-      };
-    }
-
-    async function streamWithNativeGzip(url) {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const ds = new DecompressionStream('gzip');
-      const decompressedStream = res.body.pipeThrough(ds);
-      const reader = decompressedStream.getReader();
-      const decoder = new TextDecoder();
-      let csvText = '';
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        csvText += decoder.decode(value, { stream: true });
-        Papa.parse(csvText, { ...getPapaConfig(), chunkSize: 1024 * 64 });
-        csvText = '';
-      }
-    }
-
-    async function streamWithPako(url) {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const reader = res.body.getReader();
-      let chunks = [];
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-      }
-      const totalLength = chunks.reduce((acc, val) => acc + val.length, 0);
-      let combined = new Uint8Array(totalLength);
-      let offset = 0;
-      for (const chunk of chunks) {
-        combined.set(chunk, offset);
-        offset += chunk.length;
-      }
-      const decompressed = window.pako.ungzip(combined);
-      const csvText = new TextDecoder("utf-8").decode(decompressed);
-      Papa.parse(csvText, getPapaConfig());
-    }
-
-    (async () => {
-      try {
-        if ('DecompressionStream' in window) {
-          await streamWithNativeGzip(GZ_URL);
-        } else {
-          console.warn("DecompressionStream not supported, falling back to pako.");
-          await streamWithPako(GZ_URL);
-        }
+        });
       } catch (err) {
         console.error(err);
         alert("Failed to load CSV: " + err.message);
@@ -182,5 +148,4 @@
     })();
   </script>
 </body>
-
 </html>
