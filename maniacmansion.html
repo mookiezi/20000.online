@@ -4,61 +4,123 @@
   <meta charset="utf-8" />
   <title>CSV Explorer</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-dt/css/jquery.dataTables.min.css">
-  <style>body{font-family:system-ui,Segoe UI,Arial,sans-serif;padding:20px;}</style>
+  
+  <!-- Dark theme overrides -->
+  <style>
+    body {
+      font-family: system-ui, Segoe UI, Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 0;
+    }
+    .dataTables_wrapper {
+      padding: 20px;
+    }
+    table.dataTable {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+      width: 100% !important;
+      border-collapse: collapse;
+    }
+    table.dataTable th,
+    table.dataTable td {
+      white-space: pre-wrap;   /* preserve newlines */
+      border-color: #333;
+    }
+    table.dataTable thead {
+      background-color: #222;
+    }
+    .dataTables_filter input {
+      background-color: #222;
+      color: #e0e0e0;
+      border: 1px solid #444;
+    }
+    .dataTables_length select {
+      background-color: #222;
+      color: #e0e0e0;
+      border: 1px solid #444;
+    }
+    /* Spinner overlay */
+    #loading {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(18, 18, 18, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      flex-direction: column;
+    }
+    .spinner {
+      border: 6px solid #333;
+      border-top: 6px solid #00bcd4;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-  <h1>CSV Explorer</h1>
-  <table id="tbl" class="display" style="width:100%"></table>
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Loading CSV...</p>
+  </div>
+
+  <table id="tbl" class="display"></table>
 
   <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/datatables.net@2.1.8/js/dataTables.min.js"></script>
-  <!-- pako = gzip/deflate in JS -->
   <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 
   <script>
-    const GZ_URL = "final.csv.gz";  // upload this instead of final.csv
+    const GZ_URL = "final.csv.gz";  // change to your file
 
     async function loadCSVFromGzip(url) {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const buf = await res.arrayBuffer();
       const uint8 = new Uint8Array(buf);
-      // gunzip -> Uint8Array of plain CSV bytes
       const decompressed = window.pako.ungzip(uint8);
-      // decode bytes -> string
-      const csvText = new TextDecoder("utf-8").decode(decompressed);
-      return csvText;
+      return new TextDecoder("utf-8").decode(decompressed);
     }
 
     (async () => {
-      const csvText = await loadCSVFromGzip(GZ_URL);
-
-      // Parse from string (no download option needed)
-      Papa.parse(csvText, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        complete: (res) => {
-          const data = res.data.filter(row =>
-            Object.values(row).some(v => v !== null && v !== "" && v !== undefined)
-          );
-          const columns = Object.keys(data[0] || {}).map(k => ({ title: k, data: k }));
-          new DataTable('#tbl', {
-            data,
-            columns,
-            paging: true,
-            searching: true,
-            info: true,
-            deferRender: true
-          });
-        }
-      });
-    })().catch(err => {
-      console.error(err);
-      alert("Failed to load CSV: " + err.message);
-    });
+      try {
+        const csvText = await loadCSVFromGzip(GZ_URL);
+        Papa.parse(csvText, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          complete: (res) => {
+            const data = res.data;
+            const columns = Object.keys(data[0] || {}).map(k => ({ title: k, data: k }));
+            new DataTable('#tbl', {
+              data,
+              columns,
+              paging: true,
+              searching: true,
+              info: true,
+              deferRender: true
+            });
+            document.getElementById('loading').style.display = 'none';
+          }
+        });
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load CSV: " + err.message);
+      }
+    })();
   </script>
 </body>
 </html>
