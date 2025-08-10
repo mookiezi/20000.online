@@ -130,14 +130,64 @@
           complete: (res) => {
             const data = res.data;
             const columns = Object.keys(data[0] || {}).map(k => ({ title: k, data: k }));
-            new DataTable('#tbl', {
+            const dt = new DataTable('#tbl', {
               data,
               columns,
               paging: true,
               searching: true,
               info: true,
               deferRender: true,
-              dom: '<"top"lp f>rt<"bottom"fl p><"clear">'
+
+              // Add a custom container "page-jump" to the bottom area
+              dom: '<"top"lp f>rt<"bottom"fl p <"page-jump">><"clear">',
+
+              initComplete: function () {
+                const api = this.api();
+                const container = document.querySelector('.page-jump');
+                if (!container) return;
+
+                // Simple styling to match your dark theme
+                container.style.display = 'flex';
+                container.style.alignItems = 'center';
+                container.style.gap = '8px';
+                container.style.marginLeft = '12px';
+
+                const info = api.page.info();
+                container.innerHTML = `
+                  <label style="display:flex;align-items:center;gap:6px;">
+                    <span>Page</span>
+                    <input id="pageInput" type="number" min="1" value="${info.page + 1}"
+                          style="width:80px;background:#111;color:#fff;border:1px solid #333;padding:4px 6px;border-radius:6px;">
+                    <span>of <strong id="totalPages">${info.pages}</strong></span>
+                  </label>
+                  <button id="goBtn"
+                          style="background:#00bcd4;border:0;padding:6px 10px;border-radius:8px;color:#000;font-weight:600;cursor:pointer;">
+                    Go
+                  </button>
+                `;
+
+                function go() {
+                  const pages = api.page.info().pages;
+                  let val = parseInt(document.getElementById('pageInput').value, 10);
+                  if (isNaN(val)) return;
+                  val = Math.min(Math.max(val, 1), pages);
+                  api.page(val - 1).draw('page');
+                }
+
+                container.querySelector('#goBtn').addEventListener('click', go);
+                container.querySelector('#pageInput').addEventListener('keydown', (e) => {
+                  if (e.key === 'Enter') go();
+                });
+
+                // Keep UI in sync if user paginates via the built-in controls
+                api.on('draw', function () {
+                  const i = api.page.info();
+                  const totalEl = document.getElementById('totalPages');
+                  if (totalEl) totalEl.textContent = i.pages;
+                  const input = document.getElementById('pageInput');
+                  if (input && document.activeElement !== input) input.value = i.page + 1;
+                });
+              }
             });
             document.getElementById('loading').style.display = 'none';
           }
