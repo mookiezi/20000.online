@@ -118,6 +118,34 @@
     }
     .page-jump-inline .paginate_button:hover { background: #2a2a2a; }
 
+    /* Align pagination controls to the left */
+    .dataTables_wrapper .dataTables_paginate {
+      text-align: left !important;
+    }
+
+    /* Style pagination buttons for dark theme */
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      background-color: #222 !important;
+      border: 1px solid #444 !important;
+      color: #fff !important;
+      padding: 4px 8px;
+      margin: 2px;
+      border-radius: 4px;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background-color: #444 !important;
+      color: #fff !important;
+      border: 1px solid #666 !important;
+    }
+
+    /* Active page button */
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background-color: #00bcd4 !important;
+      color: #000 !important;
+      border: 1px solid #00bcd4 !important;
+    }
+
   </style>
 </head>
 <body>
