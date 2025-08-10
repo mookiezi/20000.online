@@ -107,78 +107,106 @@
   <script src="https://cdn.jsdelivr.net/npm/datatables.net@2.1.8/js/dataTables.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 
-<script>
-  const GZ_URL = "final.csv.gz"; // change to your file
-
-  async function streamAndParseCSV(url) {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    // Set up gzip decompression stream
-    const ds = new DecompressionStream('gzip');
-    const decompressedStream = response.body.pipeThrough(ds);
-
-    // Convert stream to text
-    const reader = decompressedStream.getReader();
-    let decoder = new TextDecoder();
-    let csvText = '';
+  <script>
+    const GZ_URL = "final.csv.gz"; // change to your file
     let table;
 
-    // PapaParse config for chunked processing
-    const config = {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      worker: true,
-      chunk: (results) => {
-        if (!table) {
-          // First chunk: create table
-          const columns = Object.keys(results.data[0] || {}).map(k => ({ title: k, data: k }));
-          table = new DataTable('#tbl', {
-            data: results.data,
-            columns,
-            paging: true,
-            searching: true,
-            info: true,
-            deferRender: true,
-            dom: '<"top"lfp>rt<"bottom"lfp><"clear">'
-          });
-        } else {
-          // Append rows to existing table
-          table.rows.add(results.data).draw(false);
+    // PapaParse config for chunked streaming
+    function getPapaConfig() {
+      return {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        worker: true,
+        chunk: (results) => {
+          if (!table) {
+            const columns = Object.keys(results.data[0] || {}).map(k => ({ title: k, data: k }));
+            table = new DataTable('#tbl', {
+              data: results.data,
+              columns,
+              paging: true,
+              searching: true,
+              info: true,
+              deferRender: true,
+              dom: '<"top"lfp>rt<"bottom"lfp><"clear">'
+            });
+          } else {
+            table.rows.add(results.data).draw(false);
+          }
+        },
+        complete: () => {
+          document.getElementById('loading').style.display = 'none';
         }
-      },
-      complete: () => {
-        document.getElementById('loading').style.display = 'none';
-      }
-    };
+      };
+    }
 
-    // Read stream in chunks and feed to Papa
-    const pump = async () => {
+    // Streaming loader with native DecompressionStream
+    async function streamWithNativeGzip(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const ds = new DecompressionStream('gzip');
+      const decompressedStream = res.body.pipeThrough(ds);
+      const reader = decompressedStream.getReader();
+      const decoder = new TextDecoder();
+      let csvText = '';
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         csvText += decoder.decode(value, { stream: true });
 
-        // Try parsing partial text (Papa can handle incomplete last line)
-        Papa.parse(csvText, { ...config, chunkSize: 1024 * 64 });
-        csvText = ''; // reset buffer
+        // Parse in chunks
+        Papa.parse(csvText, { ...getPapaConfig(), chunkSize: 1024 * 64 });
+        csvText = '';
       }
-      // Final parse for leftover
-      Papa.parse(csvText, config);
-    };
-
-    await pump();
-  }
-
-  (async () => {
-    try {
-      await streamAndParseCSV(GZ_URL);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to load CSV: " + err.message);
+      if (csvText) Papa.parse(csvText, getPapaConfig());
     }
-  })();
-</script>
+
+    // Fallback loader with pako
+    async function streamWithPako(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const reader = res.body.getReader();
+      let chunks = [];
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+
+      // Concatenate all chunks into a single Uint8Array
+      const totalLength = chunks.reduce((acc, val) => acc + val.length, 0);
+      let combined = new Uint8Array(totalLength);
+      let offset = 0;
+      for (const chunk of chunks) {
+        combined.set(chunk, offset);
+        offset += chunk.length;
+      }
+
+      // Gunzip with pako
+      const decompressed = window.pako.ungzip(combined);
+      const csvText = new TextDecoder("utf-8").decode(decompressed);
+      Papa.parse(csvText, getPapaConfig());
+    }
+
+    // Auto-select loader
+    (async () => {
+      try {
+        if ('DecompressionStream' in window) {
+          await streamWithNativeGzip(GZ_URL);
+        } else {
+          console.warn("DecompressionStream not supported, falling back to pako.");
+          await streamWithPako(GZ_URL);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load CSV: " + err.message);
+      }
+    })();
+  </script>
+
 </body>
 </html>
