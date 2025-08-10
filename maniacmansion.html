@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <title>CSV Explorer</title>
@@ -7,8 +8,7 @@
 
   <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-dt/css/jquery.dataTables.min.css">
-  
-  <!-- Dark theme overrides -->
+
   <style>
     body {
       font-family: system-ui, Segoe UI, Arial, sans-serif;
@@ -32,22 +32,17 @@
     table.dataTable th,
     table.dataTable td {
       white-space: pre-wrap;
-      /* preserve newlines */
       border-color: #333 !important;
       background-color: #000 !important;
       color: #fff !important;
     }
 
     table.dataTable thead {
-      background-color: #000 !important;
+      display: none !important;
+      /* hide column names */
     }
 
-    .dataTables_filter input {
-      background-color: #111 !important;
-      color: #fff !important;
-      border: 1px solid #333 !important;
-    }
-
+    .dataTables_filter input,
     .dataTables_length select {
       background-color: #111 !important;
       color: #fff !important;
@@ -87,13 +82,9 @@
         transform: rotate(360deg);
       }
     }
-
-    table.dataTable thead {
-      display: none !important;
-      /* hides column name */
-    }
   </style>
 </head>
+
 <body>
   <div id="loading">
     <div class="spinner"></div>
@@ -111,19 +102,16 @@
     const GZ_URL = "final.csv.gz"; // change to your file
     let table;
 
-    // PapaParse config for chunked streaming
     function getPapaConfig() {
       return {
-        header: true,
+        header: false, // raw arrays, no headers
         dynamicTyping: true,
         skipEmptyLines: true,
         worker: true,
         chunk: (results) => {
           if (!table) {
-            const columns = Object.keys(results.data[0] || {}).map(k => ({ title: k, data: k }));
             table = new DataTable('#tbl', {
               data: results.data,
-              columns,
               paging: true,
               searching: true,
               info: true,
@@ -140,44 +128,33 @@
       };
     }
 
-    // Streaming loader with native DecompressionStream
     async function streamWithNativeGzip(url) {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
       const ds = new DecompressionStream('gzip');
       const decompressedStream = res.body.pipeThrough(ds);
       const reader = decompressedStream.getReader();
       const decoder = new TextDecoder();
       let csvText = '';
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         csvText += decoder.decode(value, { stream: true });
-
-        // Parse in chunks
         Papa.parse(csvText, { ...getPapaConfig(), chunkSize: 1024 * 64 });
         csvText = '';
       }
-      if (csvText) Papa.parse(csvText, getPapaConfig());
     }
 
-    // Fallback loader with pako
     async function streamWithPako(url) {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
       const reader = res.body.getReader();
       let chunks = [];
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         chunks.push(value);
       }
-
-      // Concatenate all chunks into a single Uint8Array
       const totalLength = chunks.reduce((acc, val) => acc + val.length, 0);
       let combined = new Uint8Array(totalLength);
       let offset = 0;
@@ -185,14 +162,11 @@
         combined.set(chunk, offset);
         offset += chunk.length;
       }
-
-      // Gunzip with pako
       const decompressed = window.pako.ungzip(combined);
       const csvText = new TextDecoder("utf-8").decode(decompressed);
       Papa.parse(csvText, getPapaConfig());
     }
 
-    // Auto-select loader
     (async () => {
       try {
         if ('DecompressionStream' in window) {
@@ -207,6 +181,6 @@
       }
     })();
   </script>
-
 </body>
+
 </html>
