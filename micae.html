@@ -15,12 +15,12 @@
         }
         
         .holographic-border {
-            animation: holographic 4s infinite;
+            box-shadow: 0 0 12px 6px rgba(0, 195, 255, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
         }
-        
+   
         .holographic-border::before {
             content: '';
             position: absolute;
@@ -86,7 +86,7 @@
         }
     </style>
 </head>
-<body class="bg-white min-h-screen font-sans">
+<body class="bg-black min-h-screen font-sans">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- Holographic Border Container -->
         <div class="holographic-border rounded-xl p-6 mb-8 bg-white shadow-lg">
