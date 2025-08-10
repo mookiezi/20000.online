@@ -93,6 +93,31 @@
       display: none !important;
       /* hides column name */
     }
+
+    .page-jump-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 6px;
+    }
+    .page-jump-inline input {
+      width: 70px;
+      background: #111;
+      color: #fff;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 4px 6px;
+    }
+    .page-jump-inline .paginate_button {
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid #333;
+      background: #1b1b1b;
+      color: #fff;
+      cursor: pointer;
+    }
+    .page-jump-inline .paginate_button:hover { background: #2a2a2a; }
+
   </style>
 </head>
 <body>
@@ -137,60 +162,56 @@
               searching: true,
               info: true,
               deferRender: true,
-
-              // Add custom containers for both top and bottom
-              dom: '<"top"lp f <"page-jump-top">>rt<"bottom"fl p <"page-jump-bottom">><"clear">',
+              dom: '<"top"lp f>rt<"bottom"fl p><"clear">',
 
               initComplete: function () {
                 const api = this.api();
 
-                function createJump(containerSelector) {
-                  const container = document.querySelector(containerSelector);
-                  if (!container) return;
+                function addJumpTo(pager) {
+                  if (!pager) return;
 
-                  container.style.display = 'flex';
-                  container.style.alignItems = 'center';
-                  container.style.gap = '8px';
-                  container.style.marginLeft = '12px';
-
-                  const info = api.page.info();
-                  container.innerHTML = `
-                    <label style="display:flex;align-items:center;gap:6px;">
-                      <span>Page</span>
-                      <input type="number" min="1" value="${info.page + 1}"
-                            style="width:80px;background:#111;color:#fff;border:1px solid #333;padding:4px 6px;border-radius:6px;">
-                      <span>of <strong>${info.pages}</strong></span>
-                    </label>
-                    <button style="background:#00bcd4;border:0;padding:6px 10px;border-radius:8px;color:#000;font-weight:600;cursor:pointer;">
-                      Go
-                    </button>
+                  // Create inline container right after the page buttons
+                  const wrap = document.createElement('span');
+                  wrap.className = 'page-jump-inline';
+                  wrap.innerHTML = `
+                    <span style="margin-left:.5rem;">Page</span>
+                    <input type="number" min="1" step="1" />
+                    <span class="page-jump-total"></span>
+                    <button type="button" class="paginate_button">Go</button>
                   `;
 
-                  const input = container.querySelector('input');
-                  const btn = container.querySelector('button');
+                  pager.appendChild(wrap);
+
+                  const input = wrap.querySelector('input');
+                  const total = wrap.querySelector('.page-jump-total');
+                  const btn = wrap.querySelector('button');
+
+                  function sync() {
+                    const info = api.page.info();
+                    if (document.activeElement !== input) input.value = info.page + 1;
+                    total.textContent = `of ${info.pages.toLocaleString()}`;
+                    input.max = info.pages;
+                  }
 
                   function go() {
                     const pages = api.page.info().pages;
-                    let val = parseInt(input.value, 10);
-                    if (isNaN(val)) return;
-                    val = Math.min(Math.max(val, 1), pages);
-                    api.page(val - 1).draw('page');
+                    let n = parseInt(input.value, 10);
+                    if (!Number.isFinite(n)) return;
+                    n = Math.min(Math.max(n, 1), pages);
+                    api.page(n - 1).draw('page');
                   }
 
                   btn.addEventListener('click', go);
-                  input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') go();
-                  });
+                  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
 
-                  api.on('draw', function () {
-                    const i = api.page.info();
-                    container.querySelector('strong').textContent = i.pages;
-                    if (document.activeElement !== input) input.value = i.page + 1;
-                  });
+                  // initial + keep in sync when user clicks default pager
+                  sync();
+                  api.on('draw', sync);
                 }
 
-                createJump('.page-jump-top');
-                createJump('.page-jump-bottom');
+                // DataTables v2 can use .dt-paging; v1 uses .dataTables_paginate — support both, top & bottom.
+                document.querySelectorAll('#tbl_wrapper .dt-paging, #tbl_wrapper .dataTables_paginate')
+                  .forEach(addJumpTo);
               }
             });
 
