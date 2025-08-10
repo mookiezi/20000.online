@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Discord-OpenMicae</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #b0b0d0;
+      font-family: system-ui, Segoe UI, Helvetica, Arial, sans-serif;
+      padding: 40px 20px;
+    }
+
+    .card {
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+      border: 1px solid #0a0a3d;
+      border-radius: 8px;
+      background: #000;
+      padding: 40px 50px;
+      box-shadow: 0 0 25px #0a0a3d;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    h1 a {
+      background: linear-gradient(90deg, #00f5ff, #0084ff, #7b00ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: bold;
+      position: relative;
+    }
+
+    h1 a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -2px; /* space below text */
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, #00f5ff, #0084ff, #7b00ff);
+    }
+
+    h1 a:hover {
+      background: linear-gradient(90deg, #ffffff, #ffffff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    h1 a:hover::after {
+      background: #ffffff;
+    }
+
+
+    h2 {
+      color: #fff;
+      font-size: 1.4rem;
+      margin: 30px 0 15px;
+      border-bottom: 1px solid #0a0a3d;
+      padding-bottom: 4px;
+    }
+
+    h3 {
+      color: #c5c5ff;
+      font-size: 1.1rem;
+      margin: 20px 0 8px;
+    }
+
+    p,
+    li {
+      font-size: .95rem;
+      line-height: 1.7;
+      margin: 6px 0;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    a {
+      color: #5c6bc0;
+      text-decoration: underline;
+    }
+
+    a:hover {
+      color: #8a9bff;
+      text-decoration: underline;
+    }
+
+    /* bar chart */
+    .bar-chart {
+      display: flex;
+      align-items: end;
+      gap: 8px;
+      height: 140px;
+      margin: 45px 0 60px;
+    }
+
+    .bar {
+      flex: 1;
+      background: linear-gradient(to top, #0a0a3d, #5c6bc0);
+      border-radius: 3px 3px 0 0;
+      position: relative;
+      transition: .2s;
+    }
+
+    .bar:hover {
+      opacity: .8
+    }
+
+    .bar span {
+      position: absolute;
+      bottom: -18px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: .7rem;
+      color: #b0b0d0;
+    }
+
+    .bar::before {
+      content: attr(data-value);
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: .7rem;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <img src="https://huggingface.co/datasets/mookiezi/Discord-OpenMicae/resolve/main/OpenMicae.png"
+      alt="OpenMicae Logo" style="display:block; margin:0 auto 40px; max-width:300px;">
+    <h1 style="margin-bottom:50px;"><a
+        href="https://huggingface.co/datasets/mookiezi/Discord-OpenMicae">Discord-OpenMicae</a></h1>
+    <p>A large-scale dataset of anonymized Discord conversations for training and evaluating conversational AI models in
+      a ChatML-friendly format.</p>
+
+    <ul>
+      <li><strong>250k+ Single-Turn Exchanges (STX)</strong> – standalone user → reply pairs</li>
+      <li><strong>100k+ Multi-Turn Chains</strong> – two-participant reply chains, variable length</li>
+    </ul>
+
+    <h2>Features</h2>
+    <ul>
+      <li>Real users only (no bots); links, embeds, and commands removed</li>
+      <li>Filtered for ToS violations and unsafe content</li>
+      <li>Casual Discord tone with slang preserved</li>
+      <li>Two-author chains only</li>
+      <li>Merged self-replies from the same author into a single message</li>
+      <li>Cleaned and deduplicated for relevance</li>
+      <li>Primarily English, with some other languages present</li>
+    </ul>
+
+    <h2>Use</h2>
+    <ul>
+      <li>Fine-tuning conversational models</li>
+      <li>Training relevance/reward models</li>
+      <li>Dialogue generation research</li>
+    </ul>
+
+    <h2>Dataset</h2>
+    <ul>
+      <li><strong>STX</strong>: 260,670 single-turn prompt/response pairs</li>
+      <li><strong>Chains</strong>: 101,480 multi-turn conversations (2 authors)</li>
+    </ul>
+
+    <h3>High-level totals</h3>
+    <ul>
+      <li><strong>Total tokens</strong>: 22.4 M</li>
+      <li><strong>Total characters</strong>: 107 M</li>
+      <li><strong>Total words</strong>: 15.0 M</li>
+      <li><strong>Assistant blocks</strong>: 480 k</li>
+    </ul>
+
+    <h3>Length Distribution (tokens)</h3>
+    <div class="bar-chart">
+      <div class="bar" style="height:20%" data-value="19k"><span>31–38</span></div>
+      <div class="bar" style="height:22%" data-value="22k"><span>39–46</span></div>
+      <div class="bar" style="height:76%" data-value="76k"><span>47–54</span></div>
+      <div class="bar" style="height:100%" data-value="100k"><span>55–62</span></div>
+      <div class="bar" style="height:61%" data-value="60k"><span>63–70</span></div>
+      <div class="bar" style="height:36%" data-value="36k"><span>71–78</span></div>
+      <div class="bar" style="height:21%" data-value="21k"><span>79–86</span></div>
+      <div class="bar" style="height:15%" data-value="15k"><span>87–94</span></div>
+      <div class="bar" style="height:10%" data-value="9.6k"><span>95–102</span></div>
+      <div class="bar" style="height:3%" data-value="2.7k"><span>103–110</span></div>
+    </div>
+
+    <h2>License</h2>
+    <p>Apache License 2.0</p>
+
+    <h2>Related</h2>
+    <ul>
+      <li><a href="https://huggingface.co/mookiezi/Discord-Micae-Hermes-3-3B"
+          target="_blank">mookiezi/Discord-Micae-Hermes-3-3B</a></li>
+      <li><a href="https://huggingface.co/NousResearch/Hermes-3-Llama-3.2-3B"
+          target="_blank">NousResearch/Hermes-3-Llama-3.2-3B</a></li>
+    </ul>
+
+    <p style="margin-top:25px;font-size:.85rem;color:#505080;">All data collected following Discord's Terms of Service.
+    </p>
+  </div>
+</body>
+
+</html>
