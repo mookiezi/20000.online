@@ -3,8 +3,48 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Discord-OpenMicae</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Discord-OpenMicae — Anonymized Discord Conversations Dataset (ChatML)</title>
+  <meta name="description" content="Discord-OpenMicae is a large-scale dataset of anonymized Discord conversations (260k STX, 101k chains) cleaned for conversational AI training in ChatML format." />
+  <link rel="canonical" href="https://20000.online/openmicae" />
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
   <link rel="icon" type="image/png" href="OpenMicaeFav.png">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Discord-OpenMicae — Anonymized Discord Conversations Dataset (ChatML)" />
+  <meta property="og:description" content="260k single-turn exchanges + 101k two-author chains. Cleaned, deduped, ChatML-ready." />
+  <meta property="og:url" content="https://20000.online/openmicae" />
+  <meta property="og:image" content="https://20000.online/OpenMicae.png" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Discord-OpenMicae — Anonymized Discord Conversations Dataset (ChatML)" />
+  <meta name="twitter:description" content="260k STX + 101k chains. Cleaned, deduped, ChatML-ready." />
+  <meta name="twitter:image" content="https://20000.online/OpenMicae.png" />
+
+  <!-- Schema.org JSON-LD: Dataset -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Discord-OpenMicae",
+    "description": "A large-scale dataset of anonymized Discord conversations for training conversational AI in ChatML format.",
+    "url": "https://20000.online/openmicae",
+    "license": "https://www.apache.org/licenses/LICENSE-2.0",
+    "creator": {
+      "@type": "Person",
+      "name": "mookiezi"
+    },
+    "distribution": [{
+      "@type": "DataDownload",
+      "encodingFormat": "application/json",
+      "contentUrl": "https://huggingface.co/datasets/mookiezi/Discord-OpenMicae"
+    }],
+    "keywords": ["Discord dataset","ChatML","conversational AI","dialogue","STX","multi-turn chains"]
+  }
+  </script>
+
   <style>
     body {
       margin: 0;
