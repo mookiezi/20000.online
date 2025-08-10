@@ -136,7 +136,9 @@
               searching: true,
               info: true,
               deferRender: true,
-              dom: '<"top"lp>rt<"bottom"lp><"clear">'
+              dom: '<"top"lp>rt<"bottom"lp><"clear">',
+              lengthMenu: [[8, 25, 50, 100], [8, 25, 50, 100]], // values and display text
+              pageLength: 8 // default selection
             });
             document.getElementById('loading').style.display = 'none';
           }
