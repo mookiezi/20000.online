@@ -107,45 +107,78 @@
   <script src="https://cdn.jsdelivr.net/npm/datatables.net@2.1.8/js/dataTables.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 
-  <script>
-    const GZ_URL = "final.csv.gz";  // change to your file
+<script>
+  const GZ_URL = "final.csv.gz"; // change to your file
 
-    async function loadCSVFromGzip(url) {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const buf = await res.arrayBuffer();
-      const uint8 = new Uint8Array(buf);
-      const decompressed = window.pako.ungzip(uint8);
-      return new TextDecoder("utf-8").decode(decompressed);
-    }
+  async function streamAndParseCSV(url) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    (async () => {
-      try {
-        const csvText = await loadCSVFromGzip(GZ_URL);
-        Papa.parse(csvText, {
-          header: true,
-          dynamicTyping: true,
-          skipEmptyLines: true,
-          complete: (res) => {
-            const data = res.data;
-            const columns = Object.keys(data[0] || {}).map(k => ({ title: k, data: k }));
-            new DataTable('#tbl', {
-              data,
-              columns,
-              paging: true,
-              searching: true,
-              info: true,
-              deferRender: true,
-              dom: '<"top"lfp>rt<"bottom"lfp><"clear">'
-            });
-            document.getElementById('loading').style.display = 'none';
-          }
-        });
-      } catch (err) {
-        console.error(err);
-        alert("Failed to load CSV: " + err.message);
+    // Set up gzip decompression stream
+    const ds = new DecompressionStream('gzip');
+    const decompressedStream = response.body.pipeThrough(ds);
+
+    // Convert stream to text
+    const reader = decompressedStream.getReader();
+    let decoder = new TextDecoder();
+    let csvText = '';
+    let table;
+
+    // PapaParse config for chunked processing
+    const config = {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      worker: true,
+      chunk: (results) => {
+        if (!table) {
+          // First chunk: create table
+          const columns = Object.keys(results.data[0] || {}).map(k => ({ title: k, data: k }));
+          table = new DataTable('#tbl', {
+            data: results.data,
+            columns,
+            paging: true,
+            searching: true,
+            info: true,
+            deferRender: true,
+            dom: '<"top"lfp>rt<"bottom"lfp><"clear">'
+          });
+        } else {
+          // Append rows to existing table
+          table.rows.add(results.data).draw(false);
+        }
+      },
+      complete: () => {
+        document.getElementById('loading').style.display = 'none';
       }
-    })();
-  </script>
+    };
+
+    // Read stream in chunks and feed to Papa
+    const pump = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        csvText += decoder.decode(value, { stream: true });
+
+        // Try parsing partial text (Papa can handle incomplete last line)
+        Papa.parse(csvText, { ...config, chunkSize: 1024 * 64 });
+        csvText = ''; // reset buffer
+      }
+      // Final parse for leftover
+      Papa.parse(csvText, config);
+    };
+
+    await pump();
+  }
+
+  (async () => {
+    try {
+      await streamAndParseCSV(GZ_URL);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load CSV: " + err.message);
+    }
+  })();
+</script>
 </body>
 </html>
