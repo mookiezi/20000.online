@@ -23,6 +23,7 @@
       padding: 20px;
     }
 
+    /* Table base styles */
     table.dataTable {
       background-color: #000 !important;
       color: #fff !important;
@@ -32,8 +33,7 @@
 
     table.dataTable th,
     table.dataTable td {
-      white-space: pre-wrap;
-      /* preserve newlines */
+      white-space: pre-wrap; /* preserve newlines */
       border-color: #333 !important;
       background-color: #000 !important;
       color: #fff !important;
@@ -41,14 +41,17 @@
 
     table.dataTable thead {
       background-color: #000 !important;
+      display: none !important; /* hides column names */
     }
 
+    /* Filter input */
     .dataTables_filter input {
       background-color: #111 !important;
       color: #fff !important;
       border: 1px solid #333 !important;
     }
 
+    /* Length dropdown */
     .dataTables_length select {
       background-color: #111 !important;
       color: #fff !important;
@@ -80,26 +83,18 @@
     }
 
     @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
-    table.dataTable thead {
-      display: none !important;
-      /* hides column name */
-    }
-
+    /* Page jump inline styles */
     .page-jump-inline {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       margin-left: 6px;
     }
+
     .page-jump-inline input {
       width: 70px;
       background: #111;
@@ -108,6 +103,7 @@
       border-radius: 4px;
       padding: 4px 6px;
     }
+
     .page-jump-inline .paginate_button {
       padding: 4px 8px;
       border-radius: 4px;
@@ -116,36 +112,42 @@
       color: #fff;
       cursor: pointer;
     }
-    .page-jump-inline .paginate_button:hover { background: #2a2a2a; }
 
-    /* Align pagination controls to the left */
-    .dataTables_wrapper .dataTables_paginate {
-      text-align: left !important;
+    .page-jump-inline .paginate_button:hover {
+      background: #2a2a2a;
     }
 
-    /* Style pagination buttons for dark theme */
+    /* Force pagination controls to the left */
+    .dataTables_wrapper .dataTables_paginate {
+      text-align: left !important;
+      float: left !important;
+      display: flex !important;
+      align-items: center;
+    }
+
+    /* Pagination button styles for dark theme */
     .dataTables_wrapper .dataTables_paginate .paginate_button {
       background-color: #222 !important;
       border: 1px solid #444 !important;
       color: #fff !important;
-      padding: 4px 8px;
-      margin: 2px;
-      border-radius: 4px;
+      padding: 4px 8px !important;
+      margin: 2px !important;
+      border-radius: 4px !important;
     }
 
+    /* Hover effect */
     .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
       background-color: #444 !important;
       color: #fff !important;
-      border: 1px solid #666 !important;
+      border-color: #666 !important;
     }
 
-    /* Active page button */
+    /* Active/current page button */
     .dataTables_wrapper .dataTables_paginate .paginate_button.current {
       background-color: #00bcd4 !important;
       color: #000 !important;
       border: 1px solid #00bcd4 !important;
     }
-
   </style>
 </head>
 <body>
