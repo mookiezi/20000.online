@@ -137,8 +137,20 @@
               info: true,
               deferRender: true,
               dom: '<"top"lp>rt<"bottom"lp><"clear">',
-              lengthMenu: [[8, 25, 50, 100], [8, 25, 50, 100]], // values and display text
-              pageLength: 8 // default selection
+              lengthMenu: [], // will be set dynamically
+              pageLength: -1  // temp until we calculate
+            }).on('init', function () {
+              const table = this.api();
+              // Count how many rows fit in the table body
+              const rowHeight = table.table().body().querySelector('tr').offsetHeight;
+              const bodyHeight = window.innerHeight
+                - table.table().header().offsetHeight
+                - 150; // 150px padding for controls, adjust if needed
+              const fitRows = Math.floor(bodyHeight / rowHeight);
+
+              // Set the length menu dynamically: first option = fitRows
+              table.settings()[0].aLengthMenu = [[fitRows, 25, 50, 100], [fitRows, 25, 50, 100]];
+              table.page.len(fitRows).draw();
             });
             document.getElementById('loading').style.display = 'none';
           }
