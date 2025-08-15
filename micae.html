@@ -369,7 +369,11 @@
       <div class="bg-white rounded-xl shadow p-6">
         <h2 class="text-2xl font-semibold mb-4 text-gray-800 section-title">Dataset</h2>
         <p class="text-gray-700">
-          The model was fine-tuned on the [mookiezi/Discord-OpenMicae](https://huggingface.co/datasets/mookiezi/Discord-OpenMicae) dataset.
+          The model was fine-tuned on the
+          <a href="https://huggingface.co/datasets/mookiezi/Discord-OpenMicae" class="text-blue-600 hover:underline">
+            mookiezi/Discord-OpenMicae
+          </a>
+          dataset.
         </p>
       </div>
 
@@ -414,18 +418,23 @@
 
       <!-- Generation -->
       <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-2xl font-semibold mb-4 text-gray-800 section-title">Usage example (Transformers pipeline)</h2>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-800 section-title">Interfacing</h2>
+        <p class="text-gray-700 mb-4">
+          A python script for interfacing, optimized for casual, Discord-style conversation, is available at
+          <a href="https://github.com/mookiezi/interface" class="text-blue-600 hover:underline">
+            https://github.com/mookiezi/interface
+          </a>.
+        </p>
+        <p class="text-gray-700 mb-4">To use this model run:</p>
         <div class="code-block p-4 rounded-lg mb-4 overflow-x-auto">
-          <pre class="text-gray-800 text-sm"><code>from transformers import pipeline
-
-gen = pipeline("text-generation", model="mookiezi/Discord-Micae-Hermes-3-3B")
-print(gen(
-    "&lt;|im_start|&gt;user\nwhat do you do?&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant\n",
-    max_new_tokens=100
-))</code></pre>
+          <pre class="text-gray-800 text-sm"><code>python interface.py -m mookiezi/Discord-Micae-Hermes-3-3B</code></pre>
+        </div>
+        <div class="mt-6 text-center">
+          <img src="https://github.com/mookiezi/interface/blob/main/interface-screenshot.png?raw=true" 
+               alt="Interface Screenshot" 
+               class="rounded-lg shadow inline-block">
         </div>
       </div>
-    </div>
 
     <!-- Footer -->
     <div class="mt-12 pt-6 border-t border-gray-200 text-center text-gray-500 text-sm">
