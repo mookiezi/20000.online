@@ -49,13 +49,36 @@
   </script>
 
   <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #fff;
-      font-family: system-ui, Segoe UI, Helvetica, Arial, sans-serif;
-      padding: 40px 20px;
-    }
+      body {
+        margin: 0;
+        color: #fff;
+        font-family: system-ui, Segoe UI, Helvetica, Arial, sans-serif;
+        padding: 40px 20px;      /* keeps your page spacing */
+        background: #000;        /* base behind the rain */
+        overflow-x: hidden;      /* avoid horizontal scroll with canvas */
+      }
+
+      #matrix {
+        position: fixed;
+        inset: 0;
+        z-index: 0;              /* behind content */
+        display: block;
+        background: #000;        /* no flash on load */
+      }
+
+      .card {
+        position: relative;
+        z-index: 1;              /* above the rain */
+        max-width: 720px;
+        width: 100%;
+        margin: 0 auto;
+        border: 2px solid darkgreen; /* full border highlight */
+        border-radius: 8px;
+        background: rgba(0,0,0,0.85); /* classy see-through over rain */
+        padding: 40px 50px;
+        box-shadow: 0 0 15px darkgreen;
+      }
+
 
     .card {
       max-width: 720px;
@@ -188,6 +211,7 @@
 </head>
 
 <body>
+  <canvas id="matrix"></canvas>
   <div class="card">
     <!-- Main big dataset image -->
     <img class="dataset-img"
@@ -516,6 +540,60 @@
           target="_blank">NousResearch/Hermes-3-Llama-3.2-8B</a></li>
     </ul>
   </div>
+  <script>
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      columns = Math.floor(canvas.width / fontSize);
+      drops = Array.from({ length: columns }, () => 1);
+    }
+
+    const letters = 'アァイィウヴエェオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモヤャユュヨラリルレロワヲンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const fontSize = 14;
+    let columns = 0;
+    let drops = [];
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    function draw() {
+      // faint trail (slightly stronger for more defined trails)
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';   // CHANGED from 0.05 → 0.08
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.font = fontSize + 'px monospace';
+      ctx.textBaseline = 'top';
+
+      for (let i = 0; i < drops.length; i++) {
+        const char = letters[Math.floor(Math.random() * letters.length)];
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        // body of the rain
+        ctx.fillStyle = 'rgba(0,255,70,0.85)';   // CHANGED: richer neon green
+        ctx.fillText(char, x, y);
+
+        // glowing head highlight
+        ctx.save();
+        ctx.shadowColor = '#00ff99';   // NEW: cyan-green glow
+        ctx.shadowBlur = 12;           // NEW: stronger blur
+        ctx.fillStyle = '#b6ffb6';     // NEW: bright mint head
+        ctx.fillText(char, x, y);
+        ctx.restore();
+
+        // reset + movement
+        if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  </script>
+
 </body>
 
 </html>
