@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Discord-Dialogues — Anonymized Discord Conversations Dataset (ChatML)</title>
-  <meta name="description" content="Discord-Dialogues is a large-scale dataset of anonymized Discord conversations for training and evaluating conversational AI models in a ChatML-friendly format." />
+  <meta name="description"
+    content="Discord-Dialogues is a large-scale dataset of anonymized Discord conversations for training and evaluating conversational AI models in a ChatML-friendly format." />
   <link rel="canonical" href="https://20000.online/discord-dialogues" />
   <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
   <link rel="icon" type="image/png" href="dialogues-fav.png">
@@ -15,13 +16,15 @@
   <meta property="og:title" content="Discord-Dialogues — Anonymized Discord Conversations Dataset (ChatML)" />
   <meta property="og:description" content="Large-scale anonymized Discord dialogues for LLM training. ChatML-ready." />
   <meta property="og:url" content="https://20000.online/discord-dialogues" />
-  <meta property="og:image" content="https://huggingface.co/datasets/mookiezi/Discord-Dialogues/resolve/main/assests/Discord-Dialogues.png" />
+  <meta property="og:image"
+    content="https://huggingface.co/datasets/mookiezi/Discord-Dialogues/resolve/main/assests/Discord-Dialogues.png" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Discord-Dialogues — Anonymized Discord Conversations Dataset (ChatML)" />
   <meta name="twitter:description" content="Large-scale anonymized Discord dialogues for LLM training. ChatML-ready." />
-  <meta name="twitter:image" content="https://huggingface.co/datasets/mookiezi/Discord-Dialogues/resolve/main/assests/Discord-Dialogues.png" />
+  <meta name="twitter:image"
+    content="https://huggingface.co/datasets/mookiezi/Discord-Dialogues/resolve/main/assests/Discord-Dialogues.png" />
 
   <style>
     body {
@@ -31,6 +34,7 @@
       font-family: system-ui, Segoe UI, Helvetica, Arial, sans-serif;
       padding: 40px 20px;
     }
+
     .card {
       max-width: 900px;
       margin: 0 auto;
@@ -40,11 +44,18 @@
       padding: 40px 50px;
       box-shadow: 0 0 25px #0a3d0a;
     }
-    h1, h2, h3 { color: #fff; }
+
+    h1,
+    h2,
+    h3 {
+      color: #fff;
+    }
+
     h1 {
       font-size: 2.2rem;
       text-align: center;
     }
+
     h1 a {
       background: linear-gradient(90deg, #00ff7f, #00b35c, #007f3f);
       -webkit-background-clip: text;
@@ -53,61 +64,98 @@
       font-weight: bold;
       position: relative;
     }
+
     h1 a::after {
       content: "";
       position: absolute;
-      left: 0; bottom: -2px;
-      width: 100%; height: 2px;
+      left: 0;
+      bottom: -2px;
+      width: 100%;
+      height: 2px;
       background: linear-gradient(90deg, #00ff7f, #00b35c, #007f3f);
     }
+
     h1 a:hover {
       background: linear-gradient(90deg, #ffffff, #ffffff);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
     }
-    h1 a:hover::after { background: #ffffff; }
+
+    h1 a:hover::after {
+      background: #ffffff;
+    }
+
     h2 {
       font-size: 1.4rem;
       margin: 30px 0 15px;
       border-bottom: 1px solid #0a3d0a;
       padding-bottom: 4px;
     }
-    p, li { font-size: .95rem; line-height: 1.7; }
-    ul { padding-left: 20px; }
-    a { color: #4caf50; text-decoration: underline; }
-    a:hover { color: #8cff8a; }
+
+    p,
+    li {
+      font-size: .95rem;
+      line-height: 1.7;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    a {
+      color: #4caf50;
+      text-decoration: underline;
+    }
+
+    a:hover {
+      color: #8cff8a;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
       margin: 15px 0;
       font-size: .9rem;
     }
-    table, th, td {
+
+    table,
+    th,
+    td {
       border: 1px solid #0a3d0a;
     }
-    th, td {
+
+    th,
+    td {
       padding: 6px 8px;
       text-align: left;
     }
-    th { background: #0a3d0a; color: #fff; }
+
+    th {
+      background: #0a3d0a;
+      color: #fff;
+    }
+
     .dataset-img {
       display: block;
       margin: 0 auto 40px;
       max-width: 700px;
     }
+
     .map-img {
       display: block;
       margin: 20px auto 10px;
       max-width: 700px;
       border: 1px solid #0a3d0a;
     }
+
     .map-link {
       display: block;
       text-align: center;
       font-size: 1rem;
       margin-bottom: 20px;
     }
+
     hr {
       border: none;
       border-top: 1px solid #0a3d0a;
@@ -124,7 +172,8 @@
       alt="Discord-Dialogues Main Cover">
 
     <h1><a href="https://huggingface.co/datasets/mookiezi/Discord-Dialogues">Discord-Dialogues</a></h1>
-    <p>Discord-Dialogues is a large-scale dataset of anonymized Discord conversations for training and evaluating conversational AI models in a ChatML-friendly format.</p>
+    <p>Discord-Dialogues is a large-scale dataset of anonymized Discord conversations for training and evaluating
+      conversational AI models in a ChatML-friendly format.</p>
 
     <!-- Divider before map -->
     <hr>
@@ -135,7 +184,13 @@
         src="https://huggingface.co/datasets/mookiezi/Discord-Dialogues/resolve/main/assests/discord-alpha.png"
         alt="Nomic Atlas Map Preview">
     </a>
-    <a class="map-link" href="https://atlas.nomic.ai/data/mookiezi/discord-alpha/map" target="_blank">View on Nomic Atlas</a>
+    <a class="map-link" href="https://atlas.nomic.ai/data/mookiezi/discord-alpha/map" target="_blank">View on Nomic
+      Atlas</a>
+
+    <hr>
+
+    <iframe src="https://huggingface.co/datasets/mookiezi/Discord-Dialogues/embed/viewer/default/train" frameborder="0"
+      width="100%" height="560px"></iframe>
 
     <h2>Features</h2>
     <ul>
@@ -162,84 +217,266 @@
 
     <h2>Dataset Statistics (using the Hermes-3-8B tokenizer)</h2>
     <table>
-      <tr><th>Metric</th><th>Value</th></tr>
-      <tr><td>Samples (count)</td><td>10,008,676</td></tr>
-      <tr><td>Min length (tokens)</td><td>8</td></tr>
-      <tr><td>Max length (tokens)</td><td>5,979</td></tr>
-      <tr><td>Mean length (tokens)</td><td>35.99</td></tr>
-      <tr><td>Median length (tokens)</td><td>30</td></tr>
-      <tr><td>Std dev (tokens)</td><td>21.43</td></tr>
-      <tr><td>Total tokens</td><td>360,279,716</td></tr>
-      <tr><td>Total characters</td><td>1,847,454,279</td></tr>
-      <tr><td>Total words</td><td>216,225,706</td></tr>
-      <tr><td>Total Assistant Blocks</td><td>12,775,402</td></tr>
+      <tr>
+        <th>Metric</th>
+        <th>Value</th>
+      </tr>
+      <tr>
+        <td>Samples (count)</td>
+        <td>10,008,676</td>
+      </tr>
+      <tr>
+        <td>Min length (tokens)</td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td>Max length (tokens)</td>
+        <td>5,979</td>
+      </tr>
+      <tr>
+        <td>Mean length (tokens)</td>
+        <td>35.99</td>
+      </tr>
+      <tr>
+        <td>Median length (tokens)</td>
+        <td>30</td>
+      </tr>
+      <tr>
+        <td>Std dev (tokens)</td>
+        <td>21.43</td>
+      </tr>
+      <tr>
+        <td>Total tokens</td>
+        <td>360,279,716</td>
+      </tr>
+      <tr>
+        <td>Total characters</td>
+        <td>1,847,454,279</td>
+      </tr>
+      <tr>
+        <td>Total words</td>
+        <td>216,225,706</td>
+      </tr>
+      <tr>
+        <td>Total Assistant Blocks</td>
+        <td>12,775,402</td>
+      </tr>
     </table>
 
-<h3>Tokens</h3>
-<table>
-  <tr><th>Range</th><th>Count</th></tr>
-  <tr><td>0–8</td><td>0</td></tr>
-  <tr><td>8–16</td><td>119,858</td></tr>
-  <tr><td>16–32</td><td>5,268,146</td></tr>
-  <tr><td>32–64</td><td>3,836,602</td></tr>
-  <tr><td>64–128</td><td>716,410</td></tr>
-  <tr><td>128–256</td><td>64,263</td></tr>
-  <tr><td>256–384</td><td>2,738</td></tr>
-  <tr><td>384–512</td><td>374</td></tr>
-  <tr><td>512–768</td><td>188</td></tr>
-  <tr><td>768–1024</td><td>49</td></tr>
-  <tr><td>1024–2048</td><td>37</td></tr>
-  <tr><td>2048–4096</td><td>7</td></tr>
-</table>
+    <h3>Tokens</h3>
+    <table>
+      <tr>
+        <th>Range</th>
+        <th>Count</th>
+      </tr>
+      <tr>
+        <td>0–8</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <td>8–16</td>
+        <td>119,858</td>
+      </tr>
+      <tr>
+        <td>16–32</td>
+        <td>5,268,146</td>
+      </tr>
+      <tr>
+        <td>32–64</td>
+        <td>3,836,602</td>
+      </tr>
+      <tr>
+        <td>64–128</td>
+        <td>716,410</td>
+      </tr>
+      <tr>
+        <td>128–256</td>
+        <td>64,263</td>
+      </tr>
+      <tr>
+        <td>256–384</td>
+        <td>2,738</td>
+      </tr>
+      <tr>
+        <td>384–512</td>
+        <td>374</td>
+      </tr>
+      <tr>
+        <td>512–768</td>
+        <td>188</td>
+      </tr>
+      <tr>
+        <td>768–1024</td>
+        <td>49</td>
+      </tr>
+      <tr>
+        <td>1024–2048</td>
+        <td>37</td>
+      </tr>
+      <tr>
+        <td>2048–4096</td>
+        <td>7</td>
+      </tr>
+    </table>
 
-<h3>Turns per Exchange</h3>
-<table>
-  <tr><th>Turns</th><th>Count</th></tr>
-  <tr><td>2</td><td>7,660,871</td></tr>
-  <tr><td>3</td><td>1,532,180</td></tr>
-  <tr><td>4</td><td>496,352</td></tr>
-  <tr><td>5</td><td>173,547</td></tr>
-  <tr><td>6</td><td>75,284</td></tr>
-  <tr><td>7</td><td>33,418</td></tr>
-  <tr><td>8</td><td>16,661</td></tr>
-  <tr><td>9</td><td>8,485</td></tr>
-  <tr><td>10</td><td>4,699</td></tr>
-  <tr><td>11</td><td>2,695</td></tr>
-  <tr><td>12</td><td>1,578</td></tr>
-  <tr><td>13</td><td>979</td></tr>
-  <tr><td>14</td><td>643</td></tr>
-  <tr><td>15</td><td>403</td></tr>
-  <tr><td>16</td><td>275</td></tr>
-  <tr><td>17</td><td>178</td></tr>
-  <tr><td>18</td><td>120</td></tr>
-  <tr><td>19</td><td>87</td></tr>
-  <tr><td>20</td><td>44</td></tr>
-  <tr><td>21</td><td>46</td></tr>
-  <tr><td>22</td><td>38</td></tr>
-  <tr><td>23</td><td>28</td></tr>
-  <tr><td>24</td><td>11</td></tr>
-  <tr><td>25</td><td>10</td></tr>
-  <tr><td>26</td><td>9</td></tr>
-  <tr><td>27</td><td>9</td></tr>
-  <tr><td>28</td><td>3</td></tr>
-  <tr><td>29</td><td>8</td></tr>
-  <tr><td>30</td><td>3</td></tr>
-  <tr><td>31</td><td>1</td></tr>
-  <tr><td>32</td><td>3</td></tr>
-  <tr><td>33</td><td>3</td></tr>
-  <tr><td>34</td><td>1</td></tr>
-  <tr><td>37</td><td>2</td></tr>
-  <tr><td>39</td><td>2</td></tr>
-</table>
+    <h3>Turns per Exchange</h3>
+    <table>
+      <tr>
+        <th>Turns</th>
+        <th>Count</th>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>7,660,871</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>1,532,180</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>496,352</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>173,547</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>75,284</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>33,418</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>16,661</td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td>8,485</td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td>4,699</td>
+      </tr>
+      <tr>
+        <td>11</td>
+        <td>2,695</td>
+      </tr>
+      <tr>
+        <td>12</td>
+        <td>1,578</td>
+      </tr>
+      <tr>
+        <td>13</td>
+        <td>979</td>
+      </tr>
+      <tr>
+        <td>14</td>
+        <td>643</td>
+      </tr>
+      <tr>
+        <td>15</td>
+        <td>403</td>
+      </tr>
+      <tr>
+        <td>16</td>
+        <td>275</td>
+      </tr>
+      <tr>
+        <td>17</td>
+        <td>178</td>
+      </tr>
+      <tr>
+        <td>18</td>
+        <td>120</td>
+      </tr>
+      <tr>
+        <td>19</td>
+        <td>87</td>
+      </tr>
+      <tr>
+        <td>20</td>
+        <td>44</td>
+      </tr>
+      <tr>
+        <td>21</td>
+        <td>46</td>
+      </tr>
+      <tr>
+        <td>22</td>
+        <td>38</td>
+      </tr>
+      <tr>
+        <td>23</td>
+        <td>28</td>
+      </tr>
+      <tr>
+        <td>24</td>
+        <td>11</td>
+      </tr>
+      <tr>
+        <td>25</td>
+        <td>10</td>
+      </tr>
+      <tr>
+        <td>26</td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td>27</td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td>28</td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td>29</td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td>30</td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td>31</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td>32</td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td>33</td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td>34</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td>37</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <td>39</td>
+        <td>2</td>
+      </tr>
+    </table>
 
     <h2>Disclaimer</h2>
-    <p>Although filtering the full data dump reduced it significantly, this dataset is still intended as a large-scale dump. For best training results, further curation to target high-signal data relevant to your goals is recommended.</p>
+    <p>Although filtering the full data dump reduced it significantly, this dataset is still intended as a large-scale
+      dump. For best training results, further curation to target high-signal data relevant to your goals is
+      recommended.</p>
 
     <h2>License</h2>
     <p>Apache License 2.0</p>
 
     <h2>How to cite</h2>
-<pre>@misc{discord-dialogues-2025,
+    <pre>@misc{discord-dialogues-2025,
   title = {Discord-Dialogues},
   author = {mookiezi},
   year = {2025},
@@ -248,10 +485,14 @@
 
     <h2>Related</h2>
     <ul>
-      <li><a href="https://huggingface.co/mookiezi/Discord-Micae-Hermes-3-3B" target="_blank">mookiezi/Discord-Micae-Hermes-3-3B</a></li>
-      <li><a href="https://huggingface.co/datasets/mookiezi/Discord-OpenMicae" target="_blank">Discord-OpenMicae</a></li>
-      <li><a href="https://huggingface.co/NousResearch/Hermes-3-Llama-3.2-8B" target="_blank">NousResearch/Hermes-3-Llama-3.2-8B</a></li>
+      <li><a href="https://huggingface.co/mookiezi/Discord-Micae-Hermes-3-3B"
+          target="_blank">mookiezi/Discord-Micae-Hermes-3-3B</a></li>
+      <li><a href="https://huggingface.co/datasets/mookiezi/Discord-OpenMicae" target="_blank">Discord-OpenMicae</a>
+      </li>
+      <li><a href="https://huggingface.co/NousResearch/Hermes-3-Llama-3.2-8B"
+          target="_blank">NousResearch/Hermes-3-Llama-3.2-8B</a></li>
     </ul>
   </div>
 </body>
+
 </html>
