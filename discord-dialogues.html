@@ -555,13 +555,21 @@
     const fontSize = 14;
     let columns = 0;
     let drops = [];
+    let lastFrameTime = 0;
+    const frameDelay = 25; // milliseconds between updates (slower = higher number)
 
     resize();
     window.addEventListener('resize', resize);
 
-    function draw() {
-      // faint trail (slightly stronger for more defined trails)
-      ctx.fillStyle = 'rgba(0,0,0,0.08)';   // CHANGED from 0.05 → 0.08
+    function draw(currentTime) {
+      if (currentTime - lastFrameTime < frameDelay) {
+        requestAnimationFrame(draw);
+        return;
+      }
+      lastFrameTime = currentTime;
+
+      // faint trail
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.font = fontSize + 'px monospace';
@@ -573,14 +581,14 @@
         const y = drops[i] * fontSize;
 
         // body of the rain
-        ctx.fillStyle = 'rgba(0,255,70,0.85)';   // CHANGED: richer neon green
+        ctx.fillStyle = 'rgba(0,255,70,0.85)';
         ctx.fillText(char, x, y);
 
         // glowing head highlight
         ctx.save();
-        ctx.shadowColor = '#00ff99';   // NEW: cyan-green glow
-        ctx.shadowBlur = 12;           // NEW: stronger blur
-        ctx.fillStyle = '#b6ffb6';     // NEW: bright mint head
+        ctx.shadowColor = '#00ff99';
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = '#b6ffb6';
         ctx.fillText(char, x, y);
         ctx.restore();
 
