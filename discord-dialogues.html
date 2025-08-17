@@ -49,35 +49,37 @@
   </script>
 
   <style>
-      body {
-        margin: 0;
-        color: #fff;
-        font-family: system-ui, Segoe UI, Helvetica, Arial, sans-serif;
-        padding: 40px 20px;      /* keeps your page spacing */
-        background: #000;        /* base behind the rain */
-        overflow-x: hidden;      /* avoid horizontal scroll with canvas */
-      }
+    body {
+      margin: 0;
+      color: #fff;
+      font-family: system-ui, Segoe UI, Helvetica, Arial, sans-serif;
+      padding: 40px 20px;      /* keeps your page spacing */
+      background: #000;        /* base behind the rain */
+      overflow-x: hidden;      /* avoid horizontal scroll with canvas */
+    }
 
-      #matrix {
-        position: fixed;
-        inset: 0;
-        z-index: 0;              /* behind content */
-        display: block;
-        background: #000;        /* no flash on load */
-      }
+    #matrix {
+      position: fixed;
+      inset: 0;
+      z-index: 0;              /* behind content */
+      display: block;
+      background: #000;        /* no flash on load */
+    }
 
-      .card{
-        position:relative;
-        z-index:1;
-        width:100%;
-        max-width:var(--maxw);
-        margin-inline:auto;
-        border:2px solid var(--glow);
-        border-radius:var(--radius);
-        background:#000; /* solid black */
-        padding:var(--pad);
-        box-shadow:0 0 15px var(--glow);
-      }
+    .card{
+      position:relative;
+      z-index:1;
+      width:100%;
+      max-width:var(--maxw);
+      margin-inline:auto;
+      border:2px solid var(--glow);
+      border-radius:var(--radius);
+      background:#000; /* solid black */
+      padding:var(--pad);
+      box-shadow:0 0 15px var(--glow);
+    }
+
+    .card { box-sizing: border-box; }
 
 
     .card {
@@ -185,12 +187,14 @@
     .dataset-img {
       display: block;
       margin: 0 auto 40px;
+      width: 100%;
       max-width: 700px;
     }
 
     .map-img {
       display: block;
       margin: 20px auto 10px;
+      width: 100%;
       max-width: 700px;
       border: 1px solid #0a3d0a;
     }
@@ -207,6 +211,8 @@
       border-top: 1px solid #0a3d0a;
       margin: 40px 0;
     }
+
+    iframe { width: 100%; max-width: 100%; display: block; }
   </style>
 </head>
 
