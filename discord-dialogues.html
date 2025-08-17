@@ -66,31 +66,16 @@
       background: #000;        /* no flash on load */
     }
 
-    .card{
-      position:relative;
-      z-index:1;
-      width:100%;
-      max-width:var(--maxw);
-      margin-inline:auto;
-      border:2px solid var(--glow);
-      border-radius:var(--radius);
-      background:#000; /* solid black */
-      padding:var(--pad);
-      box-shadow:0 0 15px var(--glow);
-    }
-
-    .card { box-sizing: border-box; }
-
-
     .card {
       max-width: 720px;
       width: 100%;
       margin: 0 auto;
-      border: 2px solid darkgreen; /* full border highlight */
+      border: 2px solid darkgreen;
       border-radius: 8px;
       background: #000;
-      padding: 40px 50px;
-      box-shadow: 0 0 15px darkgreen; /* even glow all around */
+      padding: 20px;              /* reduce side padding */
+      box-shadow: 0 0 15px darkgreen;
+      box-sizing: border-box;     /* make sure border+padding stay inside width */
     }
 
     h1,
