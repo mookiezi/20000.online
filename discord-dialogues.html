@@ -70,7 +70,7 @@
 
       .card {
         position: relative;         /* add */
-        z-index: 1;                 /* add */
+        z-index: 2;                 /* add */
         max-width: 720px;
         width: 100%;
         margin: 0 auto;
@@ -230,11 +230,19 @@
       margin: 15px 0;
     }
 
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85); /* 50% black */
+      z-index: 1;
+    }
+
   </style>
 </head>
 
 <body>
   <canvas id="matrix"></canvas>
+  <div id="overlay"></div>
   <div class="card">
     <!-- Main big dataset image -->
     <img class="dataset-img"
