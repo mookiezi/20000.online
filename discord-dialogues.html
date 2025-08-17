@@ -61,35 +61,26 @@
       #matrix {
         position: fixed;
         inset: 0;
-        z-index: 0;              /* behind content */
+        z-index: 0;
         display: block;
-        background: #000;        /* no flash on load */
+        background: #000;
+        pointer-events: none;   /* add */
+        touch-action: none;     /* add */
       }
 
-      .card{
-        position:relative;
-        z-index:1;
-        width:100%;
-        max-width:var(--maxw);
-        margin-inline:auto;
-        border:2px solid var(--glow);
-        border-radius:var(--radius);
-        background:#000; /* solid black */
-        padding:var(--pad);
-        box-shadow:0 0 15px var(--glow);
+      .card {
+        position: relative;         /* add */
+        z-index: 1;                 /* add */
+        max-width: 720px;
+        width: 100%;
+        margin: 0 auto;
+        border: 2px solid darkgreen;
+        border-radius: 8px;
+        background: #000;
+        padding: 20px;              /* was 40px 50px */
+        box-shadow: 0 0 15px darkgreen;
+        box-sizing: border-box;     /* keep inside width */
       }
-
-
-    .card {
-      max-width: 720px;
-      width: 100%;
-      margin: 0 auto;
-      border: 2px solid darkgreen; /* full border highlight */
-      border-radius: 8px;
-      background: #000;
-      padding: 40px 50px;
-      box-shadow: 0 0 15px darkgreen; /* even glow all around */
-    }
 
     h1,
     h2,
