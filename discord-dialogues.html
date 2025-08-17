@@ -53,9 +53,9 @@
         margin: 0;
         color: #fff;
         font-family: system-ui, Segoe UI, Helvetica, Arial, sans-serif;
-        padding: 40px 20px;      /* keeps your page spacing */
-        background: #000;        /* base behind the rain */
-        overflow-x: hidden;      /* avoid horizontal scroll with canvas */
+        padding: 40px 20px;
+        background: #000;
+        overflow-x: hidden;
       }
 
       #matrix {
@@ -64,22 +64,22 @@
         z-index: 0;
         display: block;
         background: #000;
-        pointer-events: none;   /* add */
-        touch-action: none;     /* add */
+        pointer-events: none;
+        touch-action: none;
       }
 
       .card {
-        position: relative;         /* add */
-        z-index: 2;                 /* add */
+        position: relative;
+        z-index: 2;
         max-width: 720px;
         width: 100%;
         margin: 0 auto;
         border: 2px solid darkgreen;
         border-radius: 8px;
         background: #000;
-        padding: 20px;              /* was 40px 50px */
+        padding: 20px;
         box-shadow: 0 0 15px darkgreen;
-        box-sizing: border-box;     /* keep inside width */
+        box-sizing: border-box;
       }
 
     h1,
@@ -149,11 +149,10 @@
       color: #8cff8a;
     }
 
-    /* Tables won't expand the layout; they scroll if too wide */
     table {
       border-collapse: collapse;
       width: 100%;
-      min-width: 480px;       /* ensures structure doesn’t collapse */
+      min-width: 480px;
       font-size: .9rem;
     }
 
@@ -167,8 +166,8 @@
     td {
       padding: 6px 8px;
       text-align: left;
-      word-break: break-word;   /* keep long words from stretching */
-      overflow-wrap: anywhere;  /* extra safety for long URLs/text */
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
 
     th {
@@ -206,7 +205,6 @@
 
     iframe { width: 100%; max-width: 100%; display: block; }
 
-    /* Keep code/cite blocks from blowing out the layout */
     pre, code {
       white-space: pre-wrap;
       word-break: break-word;
@@ -214,7 +212,7 @@
     }
     pre {
       max-width: 100%;
-      overflow: auto;   /* still scroll if really needed */
+      overflow: auto;
       margin: 0 0 1em;
       font-size: .9rem;
       line-height: 1.5;
@@ -226,14 +224,14 @@
     .table-wrap {
       width: 100%;
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
+      -webkit-overflow-scrolling: touch;
       margin: 15px 0;
     }
 
     #overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.85); /* 50% black */
+      background: rgba(0,0,0,0.85);
       z-index: 1;
     }
 
@@ -244,7 +242,6 @@
   <canvas id="matrix"></canvas>
   <div id="overlay"></div>
   <div class="card">
-    <!-- Main big dataset image -->
     <img class="dataset-img"
       src="https://huggingface.co/datasets/mookiezi/Discord-Dialogues/resolve/main/assests/Discord-Dialogues.png"
       alt="Discord-Dialogues Main Cover">
@@ -260,10 +257,8 @@
     <iframe src="https://huggingface.co/datasets/mookiezi/Discord-Dialogues/embed/viewer/default/train" frameborder="0"
       width="100%" height="560px"></iframe>
 
-    <!-- Divider before map -->
     <hr>
 
-    <!-- Nomic Atlas Map image + centered link -->
     <a href="https://atlas.nomic.ai/data/mookiezi/discord-alpha/map" target="_blank">
       <img class="map-img"
         src="https://huggingface.co/datasets/mookiezi/Discord-Dialogues/resolve/main/assests/discord-alpha.png"
@@ -432,7 +427,7 @@
     let columns = 0;
     let drops = [];
     let lastFrameTime = 0;
-    const frameDelay = 25; // milliseconds between updates (slower = higher number)
+    const frameDelay = 33;
 
     resize();
     window.addEventListener('resize', resize);
@@ -444,7 +439,6 @@
       }
       lastFrameTime = currentTime;
 
-      // faint trail
       ctx.fillStyle = 'rgba(0,0,0,0.08)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -456,11 +450,9 @@
         const x = i * fontSize;
         const y = drops[i] * fontSize;
 
-        // body of the rain
         ctx.fillStyle = 'rgba(0,255,70,0.85)';
         ctx.fillText(char, x, y);
 
-        // glowing head highlight
         ctx.save();
         ctx.shadowColor = '#00ff99';
         ctx.shadowBlur = 12;
@@ -468,7 +460,6 @@
         ctx.fillText(char, x, y);
         ctx.restore();
 
-        // reset + movement
         if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
       }
