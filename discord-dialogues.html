@@ -66,17 +66,17 @@
         background: #000;        /* no flash on load */
       }
 
-      .card {
-        position: relative;
-        z-index: 1;              /* above the rain */
-        max-width: 720px;
-        width: 100%;
-        margin: 0 auto;
-        border: 2px solid darkgreen; /* full border highlight */
-        border-radius: 8px;
-        background: rgba(0,0,0,0.85); /* classy see-through over rain */
-        padding: 40px 50px;
-        box-shadow: 0 0 15px darkgreen;
+      .card{
+        position:relative;
+        z-index:1;
+        width:100%;
+        max-width:var(--maxw);
+        margin-inline:auto;
+        border:2px solid var(--glow);
+        border-radius:var(--radius);
+        background:#000; /* solid center */
+        padding:var(--pad);
+        box-shadow:0 0 15px var(--glow);
       }
 
 
