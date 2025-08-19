@@ -254,7 +254,7 @@
       </p>
 
       <p style="padding-inline: clamp(12px, 2vw, 30px); text-align: center; margin-bottom: 40px; max-width: 80ch; margin-left:auto; margin-right:auto;">
-        This dataset contains 10 million exchanges with more than 216 million words, spread out over 24 million turns. 
+        This dataset contains <strong>7.5 million exchanges</strong> spread out over <strong>17 million turns</strong>, with more than <strong>145 million words</strong>.
       </p>
 
     <hr>
@@ -290,11 +290,16 @@
       <li>Training relevance/reward models</li>
       <li>Dialogue generation research</li>
     </ul>
+    <p style="margin-top:-5px;">
+      Use case example:
+      <a href="https://huggingface.co/mookiezi/Discord-Micae-8B-Preview" target="_blank">mookiezi/Discord-Micae-8B-Preview</a>
+    </p>
 
     <h2>Collection Policy</h2>
     <p>All data was collected adhering to Discord's Terms of Service.</p>
 
-    <h2>Dataset Statistics (Hermes-3-8B tokenizer)</h2>
+    <h2>Dataset Statistics<br>
+      (<a href="https://huggingface.co/NousResearch/Hermes-3-Llama-3.2-8B" target="_blank">Hermes-3-Llama-3.2-8B tokenizer</a>)</h2>
     <div class="table-wrap">
       <table>
         <tr>
@@ -303,7 +308,7 @@
         </tr>
         <tr>
           <td>Samples (count)</td>
-          <td>10,008,676</td>
+          <td>7,543,842</td>
         </tr>
         <tr>
           <td>Min length (tokens)</td>
@@ -315,35 +320,59 @@
         </tr>
         <tr>
           <td>Mean length (tokens)</td>
-          <td>35.99</td>
+          <td>33.02</td>
         </tr>
         <tr>
           <td>Median length (tokens)</td>
-          <td>30</td>
+          <td>29</td>
         </tr>
         <tr>
           <td>Std dev (tokens)</td>
-          <td>21.43</td>
+          <td>17.40</td>
+        </tr>
+        <tr>
+          <td>Skew</td>
+          <td>26.64</td>
+        </tr>
+        <tr>
+          <td>Kurtosis</td>
+          <td>7,506.83</td>
         </tr>
         <tr>
           <td>Total tokens</td>
-          <td>360,279,716</td>
+          <td>249,128,550</td>
         </tr>
         <tr>
           <td>Total characters</td>
-          <td>1,847,454,279</td>
+          <td>1,290,998,934</td>
         </tr>
         <tr>
           <td>Total words</td>
-          <td>216,225,706</td>
+          <td>145,717,457</td>
         </tr>
         <tr>
-          <td>Total Turns</td>
-          <td>23,806,427</td>
+          <td>Avg chars per sample</td>
+          <td>171.13</td>
         </tr>
         <tr>
-          <td>Total Assistant Turns</td>
-          <td>12,775,402</td>
+          <td>Avg words per sample</td>
+          <td>19.32</td>
+        </tr>
+        <tr>
+          <td>Avg chars per word</td>
+          <td>8.86</td>
+        </tr>
+        <tr>
+          <td>Tokens per char</td>
+          <td>0.19</td>
+        </tr>
+        <tr>
+          <td>Total turns</td>
+          <td>17,468,209</td>
+        </tr>
+        <tr>
+          <td>Total assistant blocks</td>
+          <td>9,339,690</td>
         </tr>
       </table>
     </div>
@@ -361,48 +390,86 @@
         </tr>
         <tr>
           <td>8–16</td>
-          <td>119,858</td>
+          <td>109,538</td>
         </tr>
         <tr>
           <td>16–32</td>
-          <td>5,268,146</td>
+          <td>4,381,031</td>
         </tr>
         <tr>
           <td>32–64</td>
-          <td>3,836,602</td>
+          <td>2,674,243</td>
         </tr>
         <tr>
           <td>64–128</td>
-          <td>716,410</td>
+          <td>360,330</td>
         </tr>
         <tr>
           <td>128–256</td>
-          <td>64,263</td>
+          <td>18,072</td>
         </tr>
         <tr>
           <td>256–384</td>
-          <td>2,738</td>
+          <td>418</td>
         </tr>
         <tr>
           <td>384–512</td>
-          <td>374</td>
+          <td>78</td>
         </tr>
         <tr>
           <td>512–768</td>
-          <td>188</td>
+          <td>77</td>
         </tr>
         <tr>
           <td>768–1024</td>
-          <td>49</td>
+          <td>30</td>
         </tr>
         <tr>
           <td>1024–2048</td>
-          <td>37</td>
+          <td>17</td>
         </tr>
         <tr>
           <td>2048–4096</td>
-          <td>7</td>
+          <td>4</td>
         </tr>
+      </table>
+    </div>
+
+    <h3>Turns per Exchange</h3>
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>Range</th>
+          <th>Count</th>
+        </tr>
+        <tr><td>2</td><td>5,967,152</td></tr>
+        <tr><td>3</td><td>1,080,262</td></tr>
+        <tr><td>4</td><td>319,838</td></tr>
+        <tr><td>5</td><td>102,569</td></tr>
+        <tr><td>6</td><td>41,302</td></tr>
+        <tr><td>7</td><td>16,941</td></tr>
+        <tr><td>8</td><td>7,737</td></tr>
+        <tr><td>9</td><td>3,705</td></tr>
+        <tr><td>10</td><td>1,865</td></tr>
+        <tr><td>11</td><td>1,015</td></tr>
+        <tr><td>12</td><td>567</td></tr>
+        <tr><td>13</td><td>329</td></tr>
+        <tr><td>14</td><td>198</td></tr>
+        <tr><td>15</td><td>133</td></tr>
+        <tr><td>16</td><td>65</td></tr>
+        <tr><td>17</td><td>64</td></tr>
+        <tr><td>18</td><td>34</td></tr>
+        <tr><td>19</td><td>21</td></tr>
+        <tr><td>20</td><td>8</td></tr>
+        <tr><td>21</td><td>12</td></tr>
+        <tr><td>22</td><td>12</td></tr>
+        <tr><td>23</td><td>2</td></tr>
+        <tr><td>24</td><td>1</td></tr>
+        <tr><td>25</td><td>4</td></tr>
+        <tr><td>27</td><td>2</td></tr>
+        <tr><td>29</td><td>1</td></tr>
+        <tr><td>33</td><td>2</td></tr>
+        <tr><td>39</td><td>1</td></tr>
       </table>
     </div>
 
