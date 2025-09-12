@@ -400,15 +400,17 @@
     const fontSize = 14;
     let columns = 0;
     let drops = [];
-    let lastFrameTime = 0;
-    let hasStopped = false; 
     const frameDelay = 33;
 
     resize();
     window.addEventListener('resize', resize);
-
+    
+    let hasStopped = false;   // has the sweep finished?
+    let fadeFrames = 60;      // ~2s fade at 30fps
+    let fading = false;
+    
     function draw(currentTime) {
-      if (hasStopped) return; // already finished the sweep
+      if (hasStopped) return;
     
       if (currentTime - lastFrameTime < frameDelay) {
         requestAnimationFrame(draw);
@@ -416,23 +418,22 @@
       }
       lastFrameTime = currentTime;
     
-      // keep the fade trail during the sweep
       ctx.fillStyle = 'rgba(0,0,0,0.08)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     
       ctx.font = fontSize + 'px monospace';
       ctx.textBaseline = 'top';
     
-      let allPastBottom = true; // assume done unless we find a drop still on screen
+      let allPastBottom = true;
     
       for (let i = 0; i < drops.length; i++) {
         const x = i * fontSize;
         const y = drops[i] * fontSize;
     
-        // if any drop is still within view, we're not done
-        if (y <= canvas.height) allPastBottom = false;
+        if (y <= canvas.height) {
+          allPastBottom = false;
+        }
     
-        // draw current glyph
         const char = letters[Math.floor(Math.random() * letters.length)];
         ctx.fillStyle = 'rgba(0,255,70,0.85)';
         ctx.fillText(char, x, y);
@@ -444,20 +445,28 @@
         ctx.fillText(char, x, y);
         ctx.restore();
     
-        // advance; DO NOT reset to top — we want only one sweep
         drops[i]++;
       }
     
-      if (allPastBottom) {
-        hasStopped = true;  // freeze on the last frame of the sweep
-        return;             // no further requestAnimationFrame
+      if (allPastBottom && !fading) {
+        fading = true; // start fade-out cycle
+      }
+    
+      if (fading) {
+        ctx.fillStyle = 'rgba(0,0,0,0.12)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        fadeFrames--;
+        if (fadeFrames <= 0) {
+          hasStopped = true; // end completely on black
+          return;
+        }
       }
     
       requestAnimationFrame(draw);
     }
     
-    // kick off the single sweep
     requestAnimationFrame(draw);
+
     
   </script>
 
