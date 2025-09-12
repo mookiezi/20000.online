@@ -140,6 +140,29 @@
       text-decoration: underline;
     }
 
+    /* media sizing */
+    .card img,
+    .map-img {
+      display: block;
+      max-width: 100%;
+      width: 100%;
+      height: auto;
+    }
+    
+    .responsive-embed {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9; /* keep it smaller + responsive */
+      margin: 24px 0;
+    }
+    .responsive-embed iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
     /* bar chart */
     .bar-chart {
       display: flex;
